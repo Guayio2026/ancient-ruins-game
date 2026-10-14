@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>精灵动画预览器</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    background: #f5f5f4; color: #2c2c2a; height: 100vh;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,.08); flex-wrap: wrap;
+  }
+  h1 { font-size: 14px; font-weight: 500; margin-right: 4px; }
+  .folder-name { font-size: 12px; color: #888780; }
+  .sel {
+    font-size: 12px; padding: 6px 10px; border: .5px solid rgba(0,0,0,.25);
+    border-radius: 8px; background: #fff; cursor: pointer; color: #2c2c2a;
+  }
+  label.file-btn {
+    font-size: 12px; padding: 6px 12px; border: .5px solid rgba(0,0,0,.25);
+    border-radius: 8px; cursor: pointer; background: #fff;
+  }
+  label.file-btn:hover { background: #f1efe8; }
+  input[type=file] { display: none; }
+
+  main { flex: 1; display: flex; min-height: 0; }
+
+  .stage-wrap {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    overflow: auto; padding: 20px; min-width: 0;
+  }
+  .stage {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .stage.checker {
+    background-color: #fff;
+    background-image:
+      linear-gradient(45deg, #dcdcd8 25%, transparent 25%),
+      linear-gradient(-45deg, #dcdcd8 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #dcdcd8 75%),
+      linear-gradient(-45deg, transparent 75%, #dcdcd8 75%);
+    background-size: 18px 18px;
+    background-position: 0 0, 0 9px, 9px -9px, -9px 0px;
+  }
+  .stage img {
+    display: block; position: absolute; left: 50%; top: 50%;
+    transform-origin: center center; image-rendering: auto;
+  }
+  .stage img.onion { opacity: .3; }
+
+  aside {
+    width: 260px; background: #fff; border-left: 1px solid rgba(0,0,0,.08);
+    padding: 16px; overflow-y: auto; flex-shrink: 0;
+  }
+  .group { margin-bottom: 20px; }
+  .group > h2 {
+    font-size: 12px; font-weight: 500; color: #5f5e5a;
+    margin-bottom: 10px; letter-spacing: .3px;
+  }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; font-size: 13px; }
+  .row .val { font-size: 12px; color: #888780; font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; accent-color: #185fa5; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-size: 12px; padding: 5px 10px; border-radius: 8px;
+    border: .5px solid rgba(0,0,0,.15); background: #fff; cursor: pointer;
+  }
+  .chip:hover { background: #f1efe8; }
+  .chip.on { background: #e6f1fb; border-color: #378add; color: #0c447c; }
+
+  footer {
+    background: #fff; border-top: 1px solid rgba(0,0,0,.08);
+    padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  button.ctrl {
+    font-size: 13px; padding: 7px 14px; border-radius: 8px; cursor: pointer;
+    border: .5px solid rgba(0,0,0,.25); background: #fff; min-width: 44px;
+  }
+  button.ctrl:hover { background: #f1efe8; }
+  button.ctrl.primary { background: #e6f1fb; border-color: #378add; color: #0c447c; font-weight: 500; }
+  .seek { flex: 1; min-width: 160px; }
+  .counter { font-size: 12px; color: #5f5e5a; font-variant-numeric: tabular-nums; min-width: 210px; text-align: right; }
+  .hint { font-size: 11px; color: #b4b2a9; }
+  #empty { font-size: 13px; color: #888780; text-align: center; line-height: 1.9; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>精灵动画预览器</h1>
+  <select class="sel" id="clipSel"></select>
+  <select class="sel" id="verSel"></select>
+  <label class="file-btn">选择文件夹<input type="file" id="picker" webkitdirectory multiple></label>
+  <label class="file-btn">选择图片<input type="file" id="pickerFiles" multiple accept="image/*"></label>
+  <span class="folder-name" id="folderName">未加载</span>
+</header>
+
+<main>
+  <div class="stage-wrap" id="stageWrap">
+    <div id="empty">正在加载动画…<br><span class="hint">如果没有显示，请点左上角「选择文件夹」手动选一次</span></div>
+    <div class="stage checker" id="stage" style="display:none">
+      <img id="onionImg" class="onion" alt="">
+      <img id="frameImg" alt="">
+    </div>
+  </div>
+
+  <aside>
+    <div class="group">
+      <h2>播放</h2>
+      <div class="row"><span>速度</span><span class="val" id="fpsVal">24 fps</span></div>
+      <input type="range" id="fps" min="1" max="60" value="24">
+      <div class="row" style="margin-top:12px">
+        <span>循环</span>
+        <input type="checkbox" id="loop" checked>
+      </div>
+      <div class="row">
+        <span>洋葱皮（显示前一帧）</span>
+        <input type="checkbox" id="onion">
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>背景</h2>
+      <div class="chips" id="bgChips">
+        <div class="chip on" data-bg="checker">棋盘格</div>
+        <div class="chip" data-bg="#000000">纯黑</div>
+        <div class="chip" data-bg="#ffffff">纯白</div>
+        <div class="chip" data-bg="#00b140">绿幕</div>
+        <div class="chip" data-bg="#2c2c2a">深灰</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>显示比例</h2>
+      <div class="chips" id="zoomChips">
+        <div class="chip on" data-zoom="1">适应窗口</div>
+        <div class="chip" data-zoom="2">200%</div>
+        <div class="chip" data-zoom="3">300%</div>
+        <div class="chip" data-zoom="4">400%</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>快捷键</h2>
+      <div class="hint" style="line-height:2">
+        空格 = 播放/暂停<br>
+        ← → = 上一帧/下一帧<br>
+        Shift + ← → = 跳 10 帧<br>
+        Home / End = 首帧/末帧
+      </div>
+    </div>
+  </aside>
+</main>
+
+<footer>
+  <button class="ctrl" id="first">⏮</button>
+  <button class="ctrl" id="prev">◀</button>
+  <button class="ctrl primary" id="play">▶ 播放</button>
+  <button class="ctrl" id="next">▶</button>
+  <button class="ctrl" id="last">⏭</button>
+  <input type="range" class="seek" id="seek" min="0" max="0" value="0">
+  <span class="counter" id="counter">0 / 0</span>
+</footer>
+
+<script>
+const STD = [
+  { label: '61帧 · 15fps（高保真）', dir: '61帧_每2取1_15fps播放', count: 61, fps: 15 },
+  { label: '21帧 · 5fps（省体积）',  dir: '21帧_游戏推荐_5fps播放', count: 21, fps: 5 },
+];
+const DTH_A = [
+  { label: '56帧 · 30fps（半跪 · 最顺滑）', dir: '56帧_原速30fps播放', count: 56, fps: 30 },
+  { label: '28帧 · 15fps（半跪 · 体积减半）', dir: '28帧_每2取1_15fps播放', count: 28, fps: 15 },
+];
+const DTH_C = [
+  { label: '66帧 · 30fps 原速（最顺滑）', dir: '66帧_原速30fps播放', count: 66, fps: 30 },
+  { label: '33帧 · 15fps（体积减半）',    dir: '33帧_每2取1_15fps播放', count: 33, fps: 15 },
+];
+const CLIPS = [
+  { label: '待机',  name: '待机',  prefix: '待机_',  versions: STD },
+  { label: '走路',  name: '走路',  prefix: '走路_',  versions: STD },
+  { label: '跑步',  name: '跑步',  prefix: '跑步_',  versions: STD },
+  { label: '攻击',  name: '攻击',  prefix: '攻击_',  versions: STD },
+  { label: '受击',  name: '受击',  prefix: '受击_',  versions: STD },
+  { label: '施法1', name: '施法1', prefix: '施法1_', versions: STD },
+  { label: '施法2', name: '施法2', prefix: '施法2_', versions: STD },
+  { label: '死亡A（半跪）', name: '死亡A', prefix: '死亡A_', versions: DTH_A },
+  { label: '死亡C', name: '死亡C', prefix: '死亡C_', versions: DTH_C },
+];
+const PAD = 3;
+
+const stage = document.getElementById('stage');
+const stageWrap = document.getElementById('stageWrap');
+const frameImg = document.getElementById('frameImg');
+const onionImg = document.getElementById('onionImg');
+const empty = document.getElementById('empty');
+const seek = document.getElementById('seek');
+const counter = document.getElementById('counter');
+const fpsEl = document.getElementById('fps');
+const fpsVal = document.getElementById('fpsVal');
+const loopEl = document.getElementById('loop');
+const onionEl = document.getElementById('onion');
+const folderName = document.getElementById('folderName');
+const playBtn = document.getElementById('play');
+
+let frames = [];      // {url, img}
+let idx = 0;
+let playing = false;
+let timer = null;
+let zoom = 'fit';
+let baseW = 0, baseH = 0;
+
+function pad(n, w) { return String(n).padStart(w, '0'); }
+
+function layout() {
+  const [a, b] = [frameImg, onionImg];
+  if (!baseW || !baseH) return;
+  let w, h;
+  if (zoom === 'fit') {
+    const availW = stageWrap.clientWidth - 60;
+    const availH = stageWrap.clientHeight - 60;
+    const s = Math.min(availW / baseW, availH / baseH, 6);
+    w = baseW * s; h = baseH * s;
+  } else {
+    w = baseW * Number(zoom); h = baseH * Number(zoom);
+  }
+  [frameImg, onionImg].forEach(im => {
+    im.style.width = w + 'px';
+    im.style.height = h + 'px';
+    im.style.marginLeft = (-w / 2) + 'px';
+    im.style.marginTop = (-h / 2) + 'px';
+  });
+  stage.style.width = w + 'px';
+  stage.style.height = h + 'px';
+}
+
+function render() {
+  if (!frames.length) return;
+  const cur = frames[idx];
+  frameImg.src = cur.url;
+  baseW = cur.img.naturalWidth || cur.img.width;
+  baseH = cur.img.naturalHeight || cur.img.height;
+  if (onionEl.checked && idx > 0) {
+    onionImg.style.display = 'block';
+    onionImg.src = frames[idx - 1].url;
+  } else {
+    onionImg.style.display = 'none';
+  }
+  seek.value = idx;
+  counter.textContent = (idx + 1) + ' / ' + frames.length + '  ·  ' + (cur.name || '');
+  layout();
+}
+
+function show() { stage.style.display = 'flex'; empty.style.display = 'none'; }
+
+function setFrames(list, name) {
+  frames = list;
+  idx = 0;
+  folderName.textContent = name + ' · ' + list.length + ' 帧';
+  seek.max = Math.max(0, list.length - 1);
+  seek.value = 0;
+  show();
+  render();
+  play();
+}
+
+/* ---------- 载入方式 1：按下拉框自动载入抽帧 ---------- */
+function loadClip(ci, vi) {
+  const clip = CLIPS[ci];
+  const vers = clip.versions;
+  if (!(vi >= 0 && vi < vers.length)) vi = 0;
+  const ver = vers[vi];
+  const folder = '女巫-' + (clip.name || clip.label) + '_抽帧/' + ver.dir;
+  fpsEl.value = ver.fps;
+  fpsVal.textContent = ver.fps + ' fps';
+  pause();
+  let loaded = 0;
+  const out = new Array(ver.count);
+  const finish = () => {
+    const ok = out.filter(Boolean);
+    if (ok.length) {
+      setFrames(ok, folder);
+    } else {
+      frames = [];
+      stage.style.display = 'none';
+      empty.style.display = 'block';
+      empty.innerHTML = '加载失败：' + folder +
+        '<br><span class="hint">找不到该文件夹里的图片，请检查目录是否存在</span>';
+      folderName.textContent = '加载失败';
+      counter.textContent = '0 / 0';
+    }
+  };
+  for (let i = 1; i <= ver.count; i++) {
+    const name = clip.prefix + pad(i, PAD) + '.png';
+    const url = encodeURI(folder + '/' + name);
+    const im = new Image();
+    im.onload = () => {
+      out[i - 1] = { url, name: name, img: im };
+      if (++loaded === ver.count) finish();
+    };
+    im.onerror = () => {
+      if (++loaded === ver.count) finish();
+    };
+    im.src = url;
+  }
+}
+
+/* ---------- 载入方式 2：手动选文件夹 / 选文件 ---------- */
+function loadFiles(fileList) {
+  const files = Array.from(fileList)
+    .filter(f => /\.(png|jpe?g|webp|gif|bmp)$/i.test(f.name))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+  if (!files.length) { alert('这个文件夹里没有找到图片'); return; }
+  const name = (files[0].webkitRelativePath ? files[0].webkitRelativePath.split('/')[0] : '已选图片');
+  let loaded = 0;
+  const out = new Array(files.length);
+  files.forEach((f, i) => {
+    const url = URL.createObjectURL(f);
+    const im = new Image();
+    const done = () => { if (++loaded === files.length) setFrames(out.filter(Boolean), name); };
+    im.onload = () => { out[i] = { url, name: f.name, img: im }; done(); };
+    im.onerror = done;
+    im.src = url;
+  });
+}
+
+document.getElementById('picker').addEventListener('change', e => loadFiles(e.target.files));
+document.getElementById('pickerFiles').addEventListener('change', e => loadFiles(e.target.files));
+
+/* ---------- 播放 ---------- */
+function play() {
+  playing = true;
+  playBtn.textContent = '⏸ 暂停';
+  clearInterval(timer);
+  timer = setInterval(step, 1000 / Number(fpsEl.value));
+}
+function pause() {
+  playing = false;
+  playBtn.textContent = '▶ 播放';
+  clearInterval(timer);
+}
+function step() {
+  if (!frames.length) return;
+  if (idx >= frames.length - 1) {
+    if (loopEl.checked) { idx = 0; render(); }
+    else pause();
+    return;
+  }
+  idx++;
+  render();
+}
+function go(i) {
+  if (!frames.length) return;
+  idx = Math.max(0, Math.min(frames.length - 1, i));
+  render();
+}
+
+playBtn.onclick = () => playing ? pause() : play();
+document.getElementById('prev').onclick = () => { pause(); go(idx - 1); };
+document.getElementById('next').onclick = () => { pause(); go(idx + 1); };
+document.getElementById('first').onclick = () => { pause(); go(0); };
+document.getElementById('last').onclick = () => { pause(); go(frames.length - 1); };
+seek.oninput = () => { pause(); go(Number(seek.value)); };
+
+fpsEl.oninput = () => {
+  fpsVal.textContent = fpsEl.value + ' fps';
+  if (playing) play();
+};
+onionEl.onchange = render;
+
+document.getElementById('bgChips').onclick = e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  document.querySelectorAll('#bgChips .chip').forEach(x => x.classList.remove('on'));
+  c.classList.add('on');
+  const bg = c.dataset.bg;
+  if (bg === 'checker') {
+    stage.classList.add('checker');
+    stage.style.background = '';
+  } else {
+    stage.classList.remove('checker');
+    stage.style.background = bg;
+  }
+};
+
+document.getElementById('zoomChips').onclick = e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  document.querySelectorAll('#zoomChips .chip').forEach(x => x.classList.remove('on'));
+  c.classList.add('on');
+  zoom = c.dataset.zoom === '1' ? 'fit' : Number(c.dataset.zoom);
+  layout();
+};
+
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' && e.target.type !== 'range') return;
+  if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); pause(); go(idx - (e.shiftKey ? 10 : 1)); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); pause(); go(idx + (e.shiftKey ? 10 : 1)); }
+  else if (e.key === 'Home') { e.preventDefault(); pause(); go(0); }
+  else if (e.key === 'End') { e.preventDefault(); pause(); go(frames.length - 1); }
+});
+
+window.addEventListener('resize', layout);
+
+const clipSel = document.getElementById('clipSel');
+const verSel = document.getElementById('verSel');
+CLIPS.forEach((c, i) => {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = c.label;
+  clipSel.appendChild(o);
+});
+function rebuildVers(ci) {
+  verSel.innerHTML = '';
+  CLIPS[ci].versions.forEach((v, i) => {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = v.label;
+    verSel.appendChild(o);
+  });
+  verSel.value = 0;
+}
+clipSel.onchange = () => { rebuildVers(Number(clipSel.value)); loadClip(Number(clipSel.value), 0); };
+verSel.onchange = () => loadClip(Number(clipSel.value), Number(verSel.value));
+rebuildVers(0);
+loadClip(0, 0);
+</script>
+</body>
+</html>

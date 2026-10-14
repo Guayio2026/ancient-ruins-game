@@ -1,0 +1,13 @@
+# 系统垃圾
+desktop.ini
+Thumbs.db
+.DS_Store
+*.tmp
+~$*
+
+# 推送临时产物
+pushlog.txt
+tryA.log
+try_push.sh
+run_push.sh
+_perm_test.txt

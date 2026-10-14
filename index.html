@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>横版卷轴动作游戏原型</title>
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0a0a0d;font-family:'Segoe UI','Microsoft YaHei',sans-serif;}
+  #game{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;box-shadow:0 0 48px rgba(0,0,0,.85);}
+  #hud{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);color:#cfd8dc;font-size:13px;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:6px;letter-spacing:1px;pointer-events:none;white-space:nowrap;}
+  #loading{position:fixed;inset:0;background:#0a0a0d;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#cfd8dc;z-index:10;}
+  #loading .bar{width:320px;height:6px;background:#222;border-radius:3px;overflow:hidden;margin-bottom:14px;}
+  #loading .bar div{height:100%;width:0;background:#39ff6b;}
+  #debugPanel{position:fixed;top:12px;right:12px;width:264px;background:rgba(10,14,20,.94);color:#e8eef2;border:1px solid #2a3a4a;border-radius:8px;padding:12px 14px;display:none;font-size:12px;z-index:5;}
+  #debugPanel .dp-title{font-weight:700;margin-bottom:6px;color:#39ff6b;font-size:13px;}
+  #debugPanel label{display:flex;align-items:center;gap:8px;margin:7px 0;}
+  #debugPanel label .lbl{flex:0 0 92px;color:#c6d3da;}
+  #debugPanel label span{min-width:36px;text-align:right;color:#9fe3ff;font-variant-numeric:tabular-nums;}
+  #debugPanel input[type=range]{flex:1;accent-color:#39ff6b;height:18px;}
+</style>
+</head>
+<body>
+<canvas id="game" width="1280" height="720"></canvas>
+<div id="hud">移动 A / D · 跳跃 空格 · 发射冰锥 Q · 慢走 Shift · 调试 ~ · 重新开始 R</div>
+
+<div id="loading">
+  <div class="bar"><div id="barfill"></div></div>
+  <div id="loadtext">加载中 0%</div>
+</div>
+
+<div id="debugPanel">
+  <div class="dp-title">调试模式</div>
+  <label><span class="lbl">平台顶面 Y</span><input type="range" id="slPlatformY" min="0" max="720" step="1"><span id="vPlatformY">558</span></label>
+  <label><span class="lbl">玩家体积缩放</span><input type="range" id="slPlayerScale" min="0.5" max="2" step="0.05"><span id="vPlayerScale">1.00</span></label>
+  <label><span class="lbl">敌人体积缩放</span><input type="range" id="slEnemyScale" min="0.5" max="2" step="0.05"><span id="vEnemyScale">1.00</span></label>
+  <label><span class="lbl">最大敌人数量</span><input type="range" id="slMaxEnemies" min="1" max="8" step="1"><span id="vMaxEnemies">3</span></label>
+  <label><span class="lbl">冰锥偏移 X</span><input type="range" id="slIceOffX" min="-200" max="200" step="5"><span id="vIceOffX">0</span></label>
+  <label><span class="lbl">冰锥偏移 Y</span><input type="range" id="slIceOffY" min="-300" max="300" step="5"><span id="vIceOffY">0</span></label>
+  <label><span class="lbl">背景横向块数</span><input type="range" id="slBgTiles" min="1" max="10" step="1"><span id="vBgTiles">2</span></label>
+</div>
+
+<script>
+'use strict';
+(function(){
+  // ============================================================
+  // 基础参数与窗口规范
+  // ============================================================
+  const VIEW_W = 1280, VIEW_H = 720;       // 16:9 基准分辨率
+  const STEP = 1/120;                      // 固定物理/动画时间步长
+  const MAX_ACCUM = 0.25;                  // 累积时间上限，防止“死亡螺旋”
+
+  // 玩家运动参数
+  const SPEED_RUN = 340;                   // 跑步速度（默认移动）
+  const SPEED_WALK = 150;                  // 慢走速度（按住 Shift）
+  const ACCEL = 2400;                      // 地面加速度
+  const FRICTION = 2200;                   // 地面摩擦
+  const JUMP_VEL = 640;                    // 起跳初速度
+  const GRAVITY = 1900;                    // 重力
+  // 受击最短僵直（秒）：这段时间内不可打断，保证受击反应至少看得到起手；
+  // 过了之后按移动键 / 跳即可直接打断，恢复自由操作。设 0 即为随时可打断。
+  const HIT_CANCEL_MIN = 0.25;
+  const ATTACK_COOLDOWN = 0.40;            // 攻击冷却（秒）
+  // 生成冰锥的帧号（0 基）。10 = 裁剪版里的第 11 帧 = 施法2 源帧 #11，
+  // 即「杖已举平前指、杖端能量球成形」的出手瞬间，前摇约 0.67 秒（原为 1.73 秒）。
+  const ATTACK_SPAWN_FRAME = 10;
+
+  // 攻击「后摇取消」生效帧（0 基）。冰锥在第 10 帧出膛，动作的战斗价值已经兑现，
+  // 剩下的「前指定格 + 收招」都算后摇 —— 从第 14 帧起按移动键 / 跳即可当场打断、立刻恢复操作。
+  // 保留的 4 帧（≈0.27 秒）是出手余势，让冰锥飞出去那一瞬还留一点分量感；
+  // 调到 10 = 一出手立刻能跑（最灵活，但攻击会显得轻飘）；调到 25（= 动画总长）等于关掉取消。
+  const ATTACK_CANCEL_FRAME = 14;
+
+  // 死亡动作的「落地修正」──────────────────────────────────────────────
+  // 「死亡C」素材横躺时，辫子和法杖会向下拖出身体下缘一大截：
+  //   身体下缘在源图 y≈532，而辫尖到 y≈623、法杖尖到 y≈586。
+  // 渲染是按整张画布底边对齐 platformY 的（见 renderActor），所以只有辫尖/杖尖触地，
+  // 身体整体悬空约 26px —— 看上去像浮在半空、没躺到台面上。
+  // 这里给死亡片段挂一条「逐帧下沉曲线」：站立段不沉（脚底本来就对得上），
+  // 倒地过程中平滑沉下去，最终停在 DEAD_SINK。
+  // 取 22 的理由：源图 y=532 是身体下缘，加 22px 后正好落到站立时脚底所在的
+  // canvasY≈551（站立帧的脚底在源图 y=606，即 platformY 上方 7px）。
+  const DEAD_SINK = 22;        // 倒地后的下沉量（画布像素）
+  const DEAD_SINK_FROM = 28;   // 从第几帧开始沉（1 基）
+  const DEAD_SINK_RAMP = 16;   // 用多少帧平滑过渡到满值
+  function deadSinkAt(fi){     // fi = 0 基帧号
+    const t = (fi + 1 - DEAD_SINK_FROM) / DEAD_SINK_RAMP;
+    return DEAD_SINK * clamp(t, 0, 1);
+  }
+
+  // 冰锥参数
+  const ICE_SPEED = 680;
+  const ICE_W = 36, ICE_H = 16;
+  const ICE_DMG = 34;
+
+  // 敌人参数
+  const ENEMY_SPEED = 120;                 // 追踪移动速度
+  const ENEMY_ACCEL = 600;
+  const ENEMY_DMG = 10;                    // 近战伤害
+  const ATTACK_RANGE = 105;                // 进入该距离后触发近战攻击（随角色体积等比缩小）
+  // 攻击判定帧（0 基，针对裁剪后的 37 帧攻击序列）：
+  // 原值 22~42 对应旧 75 帧版；裁剪后「斧头扫到最远处」落在第 15~21 帧，
+  // 且原片里被切掉的 #17~27 已被跳过，所以窗口整体前移。
+  const MELEE_START = 14, MELEE_END = 20;
+  const ATTACK_CD_ENEMY = 1.1;             // 敌人攻击后冷却（在攻击动画播完后才开始计时）
+
+  const CAM_SMOOTH = 6;                    // 相机平滑跟随系数
+
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const debugPanel = document.getElementById('debugPanel');
+
+  // ============================================================
+  // 素材路径（相对 index.html 所在目录）
+  // ============================================================
+  const WITCH_DIR = '女巫素材/_抠像PNG/';
+  const MINO_DIR  = '牛头人素材/_抠像PNG/';
+  const pad3 = n => String(n).padStart(3, '0');
+
+  // 抽帧版本子目录（全部走「高保真」档）
+  const V61 = '61帧_每2取1_15fps播放/';   // 女巫站姿类：61 帧 / 15fps（原速）
+  const V75 = '75帧_每2取1_15fps播放/';   // 牛头人站姿类：75 帧 / 15fps（原速）
+
+  // 待加载图片队列
+  const pending = [];
+  function defineClip(count, fps, loop, pathFn){
+    const frames = [];
+    for(let i = 1; i <= count; i++){
+      const im = new Image();
+      frames.push(im);
+      pending.push({ im: im, path: pathFn(i) });
+    }
+    return { frames: frames, count: count, fps: fps, loop: loop };
+  }
+
+  // 按「源帧号列表」构建片段：可跳过中间无关的帧
+  function defineClipFrom(sourceFrames, fps, loop, pathFn){
+    const frames = sourceFrames.map(function(n){
+      const im = new Image();
+      pending.push({ im: im, path: pathFn(n) });
+      return im;
+    });
+    return { frames: frames, count: frames.length, fps: fps, loop: loop };
+  }
+  const frameRange = (a, b) => { const r = []; for(let i = a; i <= b; i++) r.push(i); return r; };
+
+  // ── 从源片里裁出片段 ──────────────────────────────────────────────
+  // 源片开头普遍带一段「站立 → 起步加速」的一次性起手段，它不是循环姿势的一部分。
+  // 整段直接循环会有两个后果：
+  //   ① 每次按方向键都先卡 0.2s 才起跑，而物理速度是瞬间给上的（ACCEL 2400，0.14s 到满速）
+  //      → 画面上就是「人站着不动却滑出去一段」
+  //   ② 每循环一圈都会再冻一次，跑动中周期性卡顿
+  // 定位方法：统计每帧与「稳定段」的最大剪影 IoU，偏低的就是不会重现的一次性姿势；
+  // 再在跳过起手的前提下搜最优循环窗口（最大化首尾接缝的剪影 IoU）：
+  //   走路：起手 1~14 → 循环 [15..33] 19 帧，接缝 IoU 0.812（该段平均相邻帧仅 0.537）
+  //   跑步：起手 1~12 → 循环 [13..52] 40 帧，接缝 IoU 0.775（该段平均 0.482）
+  //   两者接缝都优于平均相邻帧 —— 循环处比正常两帧之间还顺，看不出来。
+  // 施法2 是另一种情况：中段 #17~#52 是「杖端悬着能量球」的静止定格
+  //   （帧间变化仅 1.6~6.8%，却长达 2.4s），剪掉，只留 起手→出手→短促定格 + 收招，
+  //   接缝 #16→#53 的 IoU 0.852。
+  // 牛头人-走路无起手段（帧 1 起相似度就 0.94+），保持原样不裁。
+  const WALK_SRC_FRAMES = frameRange(15, 33);
+  const RUN_SRC_FRAMES  = frameRange(13, 52);
+  const ATK_SRC_FRAMES  = frameRange(1, 16).concat(frameRange(53, 61));
+
+  // 牛头人-攻击：源片 75 帧里有三个毛病，一并用「整段跳过」解决 ——
+  //   ① 斧头被源视频画幅切断。源视频只有 624×624，抠像的裁切框横向就是整幅宽度
+  //      （left=0 right=624），说明斧头是挥出了画外、缺的像素根本不存在，补不回来。
+  //      贴边帧：#17~27（右侧切掉 13~55px）、#42~49（左侧 13~65px）、#65~75（右侧 9~54px）。
+  //   ② 后摇极长：命中后还要播 #28~#56 共 29 帧（1.93 秒）才收回中立姿势。
+  //   ③ 尾巴上还挂着第二段挥砍（#60~75），整片 75 帧 = 5.0 秒。
+  // 解法：只保留没有被切的帧，用两处最优缝合点接起来。缝合点按剪影 IoU 选：
+  //   #16 → #28  IoU 0.660   （对比：真实的相邻帧 #14→#16 只有 0.443 —— 接缝比正常两帧还顺）
+  //   #41 → #50  IoU 0.655   （该段相邻帧基线 0.61~0.76，完全在正常范围内）
+  // 收尾停在 #56：全序列里最接近「走路首帧（中立姿势：斧头扛肩上）」的一帧，
+  //   IoU 0.750，而普通收招帧只有 0.43~0.55，所以接回走路时不会跳。
+  // 起点 #1 与走路首帧的 IoU 是 0.988，进入攻击同样无缝。
+  // 结果：37 帧 / 15fps = 2.47 秒（原 75 帧 = 5.0 秒），且全程不出现被切断的斧头。
+  const MINO_ATK_SRC_FRAMES = frameRange(1, 16)
+    .concat(frameRange(28, 41))
+    .concat(frameRange(50, 56));
+
+  // 牛头人-死亡：源片 140 帧 / 30fps = 4.67 秒，但里面真正有动作的只有中间一段。
+  // 两轮裁剪，都是按「逐帧运动量 / 剪影 IoU」实测出来的，不是目测：
+  //   ① 前 38 帧（0~1.23s）角色几乎完全没动 —— 与第 36 帧的剪影 IoU 是 0.94~1.00，
+  //      只在原地微微晃，真正的倒地从第 39 帧才开始。→ 砍掉。
+  //   ② 第 109 帧之后每帧剪影变化率已 < 1.2%，角色视觉上已经躺定，后面 32 帧纯属拖时间。
+  //      → 裁到第 112 帧收尾（留 3 帧缓冲，确保姿势稳定）。
+  // 再叠加提速。这里用 60fps 而不是更高，是因为 60Hz 屏幕上超过 60fps 的帧会被整帧跳过，
+  //   数字调得再大也不会更快，只会白白丢帧。60 是「不丢帧」的上限。
+  //   39~112 共 74 帧 @ 60fps = 1.23 秒（最初 4.67 秒），倒地动作快 3.8 倍。
+  // 尾部仍保留「原地停留 + 淡出」以免尸体凭空蒸发，但都压短了：
+  //   停 0.25 秒 + 淡出 0.22 秒 → 全程走完 1.70 秒（上一版 3.53 秒，最初 4.67 秒）。
+  const MINO_DEAD_SRC_FRAMES = frameRange(39, 112);
+  const MINO_DEAD_FPS = 60;      // 源片 30fps → 2 倍速（60 是 60Hz 屏幕不丢帧的上限）
+  const DEAD_HOLD_FRAMES = 15;   // 末帧重复帧数 = 0.25 秒（按 MINO_DEAD_FPS 换算）
+  const DEAD_FADE = 0.22;        // 停留结束后淡出用时（秒）
+
+  // ── 受击片段裁剪（和死亡用同一套方法：按剪影 IoU 找「回到起始姿势」的收尾帧）──
+  // 牛头人-受击：源片 75 帧 / 15fps = **5.00 秒**，是全部动画里最长的一段。它比死亡更麻烦 ——
+  //   updateEnemy 的 hit 分支没有任何取消路径，必须整段播完才回 walk。
+  //   实测第 27 帧与首帧的剪影 IoU = 0.940，是全片最接近「回到受击前姿势」的一帧
+  //   （第 28 帧起又出现一次大幅动作，那是源片里的第二段晃动，不属于这一次受击）。
+  //   → 裁到 #27 收尾。27 帧 @ 30fps = 0.90 秒（原来 5.00 秒，−82%）。
+  //   顺带解决：#70~#75 是 6 帧完全静止的死帧（相邻帧 IoU 0.999~1.000）。
+  // 女巫-受击：源片 61 帧 / 15fps = 4.07 秒。玩家侧本来就有 HIT_CANCEL_MIN 打断，
+  //   但「不按键」时会白站 4 秒，而牛头人攻击冷却只有 1.1 秒 —— 还没恢复就会再吃一击。
+  //   实测第 44 帧与首帧 IoU = 0.940（全片最高的恢复点，次高 #43 只有 0.887）。
+  //   → 裁到 #44。44 帧 @ 30fps = 1.47 秒（原来 4.07 秒，−64%）。
+  const MINO_HIT_SRC_FRAMES  = frameRange(1, 27);
+  const MINO_HIT_FPS  = 30;
+  const WITCH_HIT_SRC_FRAMES = frameRange(1, 44);
+  const WITCH_HIT_FPS = 30;
+
+  // 玩家「洛琪希」动画
+  //   待机/走路/跑步：_抽帧 61 帧 · 15fps，文件名 3 位补零且不含角色名
+  //   受击 → 裁到 44 帧 · 30fps（见 WITCH_HIT_SRC_FRAMES 说明）
+  //   攻击 → 绑定「施法2」的裁剪版：全库唯一的「举杖前指」姿势，冰锥从法杖尖端射出才合理
+  //   死亡 → 死亡C 66 帧 · 原速 30fps，播一次后停在末帧
+  const playerClips = {
+    idle:   defineClip(61, 15, true,  i => `${WITCH_DIR}女巫-待机_抽帧/${V61}待机_${pad3(i)}.png`),
+    walk:   defineClipFrom(WALK_SRC_FRAMES, 15, true,  i => `${WITCH_DIR}女巫-走路_抽帧/${V61}走路_${pad3(i)}.png`),
+    run:    defineClipFrom(RUN_SRC_FRAMES,  15, true,  i => `${WITCH_DIR}女巫-跑步_抽帧/${V61}跑步_${pad3(i)}.png`),
+    attack: defineClipFrom(ATK_SRC_FRAMES,  15, false, i => `${WITCH_DIR}女巫-施法2_抽帧/${V61}施法2_${pad3(i)}.png`),
+    hit:    defineClipFrom(WITCH_HIT_SRC_FRAMES, WITCH_HIT_FPS, false, i => `${WITCH_DIR}女巫-受击_抽帧/${V61}受击_${pad3(i)}.png`),
+    dead:   defineClip(66, 30, false, i => `${WITCH_DIR}女巫-死亡C_抽帧/66帧_原速30fps播放/死亡C_${pad3(i)}.png`),
+  };
+  // 死亡片段单独挂一条下沉曲线，把横躺时悬空的身体压回台面（见 DEAD_SINK 说明）
+  playerClips.dead.sinkFn = deadSinkAt;
+
+  // 敌人「牛头人」动画（无待机素材）
+  //   走路 → _抽帧 75 帧 · 15fps 原速
+  //   受击 → 裁到 27 帧 · 30fps（见 MINO_HIT_SRC_FRAMES 说明）
+  //   死亡 → 死亡源片裁成 74 帧 · 60fps，尾部停住末帧再淡出（见 MINO_DEAD_SRC_FRAMES 说明）
+  const enemyClips = {
+    walk:   defineClip(75,  15, true,  i => `${MINO_DIR}牛头人-走路_抽帧/${V75}走路_${pad3(i)}.png`),
+    // 攻击用裁剪版 37 帧（见 MINO_ATK_SRC_FRAMES 的说明）
+    attack: defineClipFrom(MINO_ATK_SRC_FRAMES, 15, false, i => `${MINO_DIR}牛头人-攻击_抽帧/${V75}攻击_${pad3(i)}.png`),
+    hit:    defineClipFrom(MINO_HIT_SRC_FRAMES, MINO_HIT_FPS, false, i => `${MINO_DIR}牛头人-受击_抽帧/${V75}受击_${pad3(i)}.png`),
+    dead:   defineClipFrom(MINO_DEAD_SRC_FRAMES, MINO_DEAD_FPS, false, i => `${MINO_DIR}牛头人-死亡_抽帧/140帧_原速30fps播放/死亡_${pad3(i)}.png`),
+  };
+  // 倒地后原地停留：把末帧重复若干次接在片段尾部。
+  // 复用同一张 Image 对象，不会多加载图片，只是让播放停在最后一帧上。
+  {
+    const dDead = enemyClips.dead;
+    const lastFrame = dDead.frames[dDead.count - 1];
+    for(let i = 0; i < DEAD_HOLD_FRAMES; i++) dDead.frames.push(lastFrame);
+    dDead.count = dDead.frames.length;
+  }
+  // 牛头人没有待机素材：用「走路」序列第 1 帧作为单帧待机
+  enemyClips.idle = { frames: [enemyClips.walk.frames[0]], count: 1, fps: 1, loop: true };
+
+  const bgImg = new Image();
+  pending.push({ im: bgImg, path: 'ComfyUI_00020.png' });
+
+  // ============================================================
+  // 全局状态（可在调试模式中调整）
+  // ============================================================
+  // 接地线（平台顶面）。背景图 672x320 会拉伸铺满 720 高度 → 画布Y = 背景y / 320 * 720
+  // 前景石台的台面亮带位于画布 Y 540~578（背景 y 240~257），取台面正中 558 作接地线，
+  // 脚下与身后各留约 20px 台面，阴影也不会溢到前缘的挡墙上。
+  let platformY = Math.round(VIEW_H * (248 / 320));   // = 558
+  let playerScale = 1;          // 玩家体积缩放
+  let enemyScale = 1;           // 敌人体积缩放
+  let maxEnemies = 3;           // 同时最大敌人数
+  let iceOffX = 0, iceOffY = 0; // 冰锥生成位置（相对玩家的偏移）
+  let debug = false;            // 调试模式开关
+
+  // 背景横向循环 ────────────────────────────────────────────────
+  // 背景原图 672×320 铺满 720 高度后每块宽 1512px。原图左右边缘「接不上」：
+  // 把首尾直接相接做逐行像素差，均值 20.4、最大 129.3，误差全集中在发光台面的亮带上 ——
+  // 直接 `A|A` 平铺会在接缝处出现一条明显的结构错位线。
+  // 改用「镜像成对」平铺：序列为  A | flip(A) | A | flip(A) …
+  //   接缝①（A 与 flipA 之间）：flipA 的最左列 = A 的最右列 → 两侧同一列像素，必然连续；
+  //   接缝②（flipA 与 A 之间）：flipA 的最右列 = A 的最左列 → 同样是同一列像素。
+  // 也就是说整条平铺串上每一处接缝都是「同一列像素并排」，数学上不存在硬接，
+  // 远优于把原图首尾强接。实测放大对比里，镜像接缝处两根石柱自然拼成对称结构。
+  let bgTiles = 2;                        // 横向平铺块数（1 块 = 一张原图宽；偶数位用镜像）
+  const BG_TILES_MIN = 1, BG_TILES_MAX = 10;
+  const bgMirror = document.createElement('canvas');  // 预渲染的水平镜像图（flip(A)）
+  let bgMirrorReady = false;
+  function buildBgMirror(){
+    if(!bgImg.naturalWidth) return;
+    bgMirror.width = bgImg.naturalWidth;
+    bgMirror.height = bgImg.naturalHeight;
+    const g = bgMirror.getContext('2d');
+    g.translate(bgMirror.width, 0);
+    g.scale(-1, 1);
+    g.drawImage(bgImg, 0, 0);
+    bgMirrorReady = true;
+  }
+  function bgTileW(){ return VIEW_H * (bgImg.naturalWidth / bgImg.naturalHeight); }
+  function computeWorldW(){ return bgTileW() * Math.max(1, bgTiles); }
+
+  let worldW = VIEW_H * (672 / 320); // 世界宽度（加载后按真实尺寸 × 平铺块数重算）
+  const camera = { x: 0 };
+  const shards = [];
+  let enemies = [];
+  let spawnTimer = 1.2;
+
+  // ============================================================
+  // 玩家对象
+  // ============================================================
+  const player = {
+    baseH: 185, clips: playerClips,
+    x: 420, y: 0, vx: 0, vy: 0, facing: 1,
+    state: 'idle', clip: 'idle', animTime: 0, frameIndex: 0, animDone: false,
+    hp: 100, maxHp: 100, scale: 1, flash: 0, invuln: 0,
+    onGround: true, attackCd: 0, spawned: false, deadFinished: false,
+    bodyW: 0.36, bodyH: 0.72,
+  };
+  player.y = platformY;
+
+  // ============================================================
+  // 工具函数
+  // ============================================================
+  function clamp(v, a, b){ return v < a ? a : (v > b ? b : v); }
+  function approach(v, target, maxDelta){
+    const d = target - v;
+    if(Math.abs(d) <= maxDelta) return target;
+    return v + Math.sign(d) * maxDelta;
+  }
+  function rectOverlap(a, b){
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  // 动画状态机辅助
+  function playClip(a, name){
+    a.clip = name; a.animTime = 0; a.animDone = false; a.frameIndex = 0; a.spawned = false;
+  }
+  function setState(a, name){
+    if(a.clip !== name) playClip(a, name);
+    a.state = name;
+  }
+  function advanceAnim(a, dt){
+    const c = a.clips[a.clip];
+    a.animTime += dt;
+    let idx = Math.floor(a.animTime * c.fps);
+    if(idx >= c.count){
+      if(c.loop) idx = idx % c.count;
+      else { idx = c.count - 1; a.animDone = true; }
+    }
+    a.frameIndex = idx;
+  }
+
+  // 物理（水平位移 + 重力 + 平台接地）
+  function applyGravity(a, dt){
+    a.x += a.vx * dt;              // 水平位移（含移动与击退）
+    a.vy += GRAVITY * dt;
+    a.y += a.vy * dt;
+    if(a.y >= platformY){ a.y = platformY; a.vy = 0; a.onGround = true; }
+    else a.onGround = false;
+  }
+  function clampToWorld(a){
+    const half = a.bodyW * a.baseH * a.scale / 2;
+    a.x = clamp(a.x, half, worldW - half);
+  }
+
+  // 碰撞盒（世界坐标）
+  function bodyBox(a){
+    const rh = a.baseH * a.scale;
+    const w = rh * a.bodyW, h = rh * a.bodyH;
+    return { x: a.x - w / 2, y: a.y - h, w: w, h: h };
+  }
+  function meleeBox(e){
+    const rh = e.baseH * e.scale;
+    const w = rh * 0.55, h = rh * 0.55;
+    const cx = e.x + e.facing * (rh * 0.30 + w / 2);   // 挥砍中心（身前约 125px）
+    const bb = bodyBox(e);
+    // 判定体积 = 挥砍范围，并且**向后补到自身碰撞盒**。
+    // 原写法只留「身前一拳到一臂」这一截（e.x+65 ~ e.x+185），牛头人自己的身体那一圈
+    // 反而是空的 —— 玩家被它顶到身上时正好落进这个死区，挥砍永远落空。
+    // 实测修复前 d=0 时命中率 0；补上自身身体后，只要挨着就打得中。
+    const x0 = Math.min(cx - w / 2, bb.x), x1 = Math.max(cx + w / 2, bb.x + bb.w);
+    return { x: x0, y: e.y - h, w: x1 - x0, h: h };
+  }
+  function shardBox(s){ return { x: s.x - s.w / 2, y: s.y - s.h / 2, w: s.w, h: s.h }; }
+
+  // 冰锥的「出膛点」与「枪口段」────────────────────────────────────────
+  //   出膛点 = 法杖尖端（身前 rh*0.45 + iceOffX，默认 ≈83px，可用调试滑块微调）
+  //   枪口段 = 自身碰撞盒，向前延伸补到法杖尖端 —— 一整块都算命中体积
+  // 为什么必须有枪口段：牛头人贴上来时，它的碰撞盒只有中心 ±60px，而冰锥是在
+  //   83px 处出生的、自身还只有 36px 宽 —— 整个盒子都落在它身体之外，于是冰锥
+  //   「从它的模型里径直穿出去」，一帧都碰不到，表现就是重叠时完全打不中。
+  //   补上这段后规则变得很直白：**只要它挨着你（或站在杖尖前），出膛瞬间即命中**。
+  function iceMuzzle(p){
+    const rh = p.baseH * p.scale;
+    const sx = p.x + p.facing * (rh * 0.45 + iceOffX);
+    const sy = p.y - (rh * 0.50) + iceOffY;
+    const bb = bodyBox(p);                       // 自身碰撞盒（脚底对齐 platformY）
+    const x0 = Math.min(bb.x, sx), x1 = Math.max(bb.x + bb.w, sx);
+    const y0 = Math.min(bb.y, sy - ICE_H / 2), y1 = Math.max(bb.y + bb.h, sy + ICE_H / 2);
+    return { sx: sx, sy: sy,
+             box: { x: x0, y: y0, w: Math.max(1, x1 - x0), h: Math.max(1, y1 - y0) } };
+  }
+
+  // ============================================================
+  // 玩家逻辑
+  // ============================================================
+  function requestAttack(){
+    const p = player;
+    if(p.state === 'dead' || p.state === 'hit' || p.state === 'attack') return;
+    if(p.attackCd > 0) return;
+    // 按下瞬间按当前按键方向锁定朝向，保证「A + Q 同时按」也能朝左发射冰锥
+    const dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+    if(dir !== 0) p.facing = dir;
+    p.attackCd = ATTACK_COOLDOWN;
+    setState(p, 'attack');
+  }
+  function spawnIce(){
+    const p = player;
+    const m = iceMuzzle(p);
+
+    // ① 贴脸补射：出膛瞬间先拿「枪口段」扫一遍，段内最近的敌人按零距离命中结算，
+    //    这一发不再飞出（对手已经被打到了；再飞出去只会看到冰锥穿过它身体）。
+    //    没有这一步，敌人贴到身上时冰锥会从它模型里穿过去，一发都打不中。
+    let best = null, bestD = Infinity;
+    for(const e of enemies){
+      if(e.state === 'dead' || e.removed) continue;
+      if(!rectOverlap(m.box, bodyBox(e))) continue;
+      const d = Math.abs(e.x - p.x);
+      if(d < bestD){ bestD = d; best = e; }
+    }
+    if(best){ damageEnemy(best, ICE_DMG, p.x); return; }
+
+    // ② 正常发射
+    shards.push({ x: m.sx, y: m.sy, vx: p.facing * ICE_SPEED, w: ICE_W, h: ICE_H });
+  }
+  function damagePlayer(dmg, fromX){
+    const p = player;
+    if(p.state === 'dead' || p.invuln > 0) return;
+    p.hp -= dmg;
+    p.flash = 0.25;       // 受击红色闪烁
+    p.invuln = 0.6;       // 短暂无敌
+    p.vx = (p.x >= fromX ? 1 : -1) * 260; // 轻微击退
+    if(p.hp <= 0){ p.hp = 0; setState(p, 'dead'); p.deadFinished = false; }
+    else setState(p, 'hit');
+  }
+  function updatePlayer(dt){
+    const p = player;
+    p.scale = playerScale;
+    p.flash = Math.max(0, p.flash - dt);
+    p.invuln = Math.max(0, p.invuln - dt);
+    p.attackCd = Math.max(0, p.attackCd - dt);
+
+    const dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+
+    // 朝向跟随移动方向。攻击/受击/死亡期间锁定朝向，
+    // 否则挥杖或倒地动作会在半途被翻转（镜像跳变）。
+    if(dir !== 0 && p.state !== 'dead' && p.state !== 'hit' && p.state !== 'attack'){
+      p.facing = dir;
+    }
+
+    // 死亡：播放一次，结束后保持最后一帧静止
+    if(p.state === 'dead'){
+      advanceAnim(p, dt);
+      if(p.animDone) p.deadFinished = true;
+      p.y = platformY;
+      return;
+    }
+
+    // 受击：播放一次，击退衰减。
+    // 超过最短僵直后，按移动键或跳可以直接打断，当帧立刻恢复操作
+    // （受击源片已从 4.07 秒裁到 1.47 秒，即使不按键也不会被锁太久）。
+    if(p.state === 'hit'){
+      p.vx = approach(p.vx, 0, 1400 * dt);
+      applyGravity(p, dt);
+      advanceAnim(p, dt);
+      clampToWorld(p);
+      const canCancel = p.animTime >= HIT_CANCEL_MIN && (dir !== 0 || jumpQueued);
+      if(p.animDone || canCancel){
+        setState(p, 'idle');
+        if(dir !== 0) p.facing = dir;   // 打断时同帧就转向，不用多等一帧
+        // 这里故意不 return：让本帧直接落到下面的正常移动逻辑，打断没有额外延迟
+      } else {
+        return;
+      }
+    }
+
+    // 攻击：播放一次，到生成帧时发射冰锥。
+    // 出膛之后剩下的「前指定格 + 收招」全部算后摇，从 ATTACK_CANCEL_FRAME 起可以用移动键 / 跳
+    // 当场取消（和上面 hit 分支同一套写法：当帧就落到移动逻辑，取消没有额外延迟）。
+    if(p.state === 'attack'){
+      p.vx = approach(p.vx, 0, 1800 * dt);
+      applyGravity(p, dt);
+      advanceAnim(p, dt);
+      if(!p.spawned && p.frameIndex >= ATTACK_SPAWN_FRAME){ spawnIce(); p.spawned = true; }
+      const canCancel = p.frameIndex >= ATTACK_CANCEL_FRAME && (dir !== 0 || jumpQueued);
+      if(p.animDone || canCancel){
+        setState(p, 'idle');
+        if(dir !== 0) p.facing = dir;   // 取消时同帧转向，不用多等一帧
+        // 故意不 return：本帧直接落到下面的正常移动逻辑
+      } else {
+        clampToWorld(p);
+        return;
+      }
+    }
+
+    // 正常移动（待机 / 慢走 / 跑步，空中复用跑步帧）
+    const speed = input.shift ? SPEED_WALK : SPEED_RUN;
+    const target = dir * speed;
+    p.vx = approach(p.vx, target, ACCEL * dt);
+    if(dir === 0 && p.onGround) p.vx = approach(p.vx, 0, FRICTION * dt);
+
+    if(jumpQueued && p.onGround){ p.vy = -JUMP_VEL; p.onGround = false; }
+    jumpQueued = false;
+
+    applyGravity(p, dt);
+    clampToWorld(p);
+    advanceAnim(p, dt);            // 待机 / 移动 / 跑步动画推进
+
+    if(!p.onGround) setState(p, 'run');
+    else if(dir !== 0) setState(p, input.shift ? 'walk' : 'run');
+    else setState(p, 'idle');
+  }
+
+  // ============================================================
+  // 敌人逻辑（牛头人 · 近战）
+  // ============================================================
+  function createEnemy(x){
+    return {
+      baseH: 218, clips: enemyClips,
+      x: x, y: platformY, vx: 0, vy: 0, facing: 1,
+      state: 'idle', clip: 'idle', animTime: 0, frameIndex: 0, animDone: false,
+      hp: 100, maxHp: 100, scale: enemyScale, flash: 0,
+      onGround: true, attackCd: Math.random() * 0.5, meleeHit: false,
+      bodyW: 0.55, bodyH: 0.80, removed: false,
+      alpha: 1, deadFade: 0, fadeOnDeath: true,   // 尸体淡出（见 DEAD_FADE 说明）
+    };
+  }
+  function spawnEnemy(){
+    let x = 200 + Math.random() * (worldW - 400);
+    for(let t = 0; t < 20; t++){
+      if(Math.abs(x - player.x) > 320) break;
+      x = 200 + Math.random() * (worldW - 400);
+    }
+    const e = createEnemy(x);
+    e.facing = player.x >= x ? 1 : -1;
+    enemies.push(e);
+  }
+  function damageEnemy(e, dmg, fromX){
+    if(e.state === 'dead') return;
+    e.hp -= dmg;
+    e.flash = 0.22;                  // 受击闪白：霸体期间也保留，让玩家知道自己打中了
+    if(e.hp <= 0){ e.hp = 0; setState(e, 'dead'); }
+    // 攻击期间「霸体」：只掉血，不切受击状态、不中断挥砍。
+    // 原来的写法是无条件 setState(e,'hit')，而挥砍判定在第 #14~20 帧 —— 于是前摇一被打中就报废。
+    // 实测玩家每 0.5 秒放一发冰锥时：牛头人 30 秒挥砍 4 次、造成 0 伤害、83% 时间卡在 hit 状态。
+    // 现在攻击动作不可打断（想打出伤害就得等它的攻击间隙），非攻击状态下受击照常。
+    else if(e.state !== 'attack'){ setState(e, 'hit'); e.vx = (e.x >= fromX ? 1 : -1) * 150; }
+  }
+  function updateEnemy(e, dt){
+    e.scale = enemyScale;
+    e.flash = Math.max(0, e.flash - dt);
+    e.attackCd = Math.max(0, e.attackCd - dt);
+    const p = player;
+
+    // 死亡：播放一次，结束后原地停留（末帧重复），再淡出移出场景
+    if(e.state === 'dead'){
+      advanceAnim(e, dt);
+      if(e.animDone){
+        e.deadFade += dt;
+        e.alpha = clamp(1 - e.deadFade / DEAD_FADE, 0, 1);
+        if(e.deadFade >= DEAD_FADE) e.removed = true;
+      }
+      return;
+    }
+
+    const pDead = p.state === 'dead';
+    e.facing = (p.x >= e.x) ? 1 : -1;
+
+    if(e.state === 'hit'){
+      e.vx = approach(e.vx, 0, 1500 * dt);
+      applyGravity(e, dt);
+      advanceAnim(e, dt);
+      if(e.animDone) setState(e, 'walk');
+      clampToWorld(e);
+      return;
+    }
+
+    if(e.state === 'attack'){
+      e.vx = approach(e.vx, 0, 2200 * dt);
+      applyGravity(e, dt);
+      advanceAnim(e, dt);
+      // 仅在攻击判定帧激活前方命中盒
+      if(!e.meleeHit && e.frameIndex >= MELEE_START && e.frameIndex <= MELEE_END){
+        if(rectOverlap(meleeBox(e), bodyBox(p)) && p.state !== 'dead'){
+          damagePlayer(ENEMY_DMG, e.x);
+          e.meleeHit = true;
+        }
+      }
+      if(e.animDone){ setState(e, 'walk'); e.attackCd = ATTACK_CD_ENEMY; }
+      clampToWorld(e);
+      return;
+    }
+
+    // 追踪：持续朝向玩家水平移动，进入攻击距离后触发近战
+    if(pDead){
+      e.vx = approach(e.vx, 0, 1200 * dt);
+      setState(e, 'idle');
+    } else {
+      const dist = Math.abs(p.x - e.x);
+      if(dist <= ATTACK_RANGE && e.attackCd <= 0){
+        setState(e, 'attack');
+        e.meleeHit = false;
+      } else {
+        // 保持攻击距离：已经进到 ATTACK_RANGE 里、但冷却还没好 → 原地停住，别再往前顶。
+        // 原写法是「只要没挥砍就一路推进」，于是冷却期（1.1s × 120px/s ≈ 132px）里牛头人
+        // 会直接穿过玩家停在它身上，随后朝向在两帧之间来回翻转（精灵每帧左右抖），
+        // 挥砍也从命中区滑到死区里 —— 实测 24 秒挥砍 6 次只中 1 次。
+        e.vx = approach(e.vx, dist > ATTACK_RANGE ? e.facing * ENEMY_SPEED : 0, ENEMY_ACCEL * dt);
+        setState(e, 'walk');
+      }
+    }
+    advanceAnim(e, dt);            // 待机 / 移动动画推进
+    applyGravity(e, dt);
+    clampToWorld(e);
+  }
+
+  function updateSpawner(dt){
+    enemies = enemies.filter(e => !e.removed);
+    const alive = enemies.filter(e => e.state !== 'dead');
+    if(alive.length < maxEnemies){
+      spawnTimer -= dt;
+      if(spawnTimer <= 0){ spawnEnemy(); spawnTimer = 1.6; }
+    } else {
+      spawnTimer = Math.min(spawnTimer, 1.6);
+    }
+  }
+
+  // ============================================================
+  // 冰锥逻辑
+  // ============================================================
+  function updateShards(dt){
+    for(let i = shards.length - 1; i >= 0; i--){
+      const s = shards[i];
+      s.x += s.vx * dt;
+      let hit = false;
+      for(const e of enemies){
+        if(e.state === 'dead' || e.removed) continue;
+        if(rectOverlap(shardBox(s), bodyBox(e))){ damageEnemy(e, ICE_DMG, s.x); hit = true; break; }
+      }
+      if(hit){ shards.splice(i, 1); continue; }
+      if(s.x < -60 || s.x > worldW + 60){ shards.splice(i, 1); continue; } // 飞出屏幕销毁
+    }
+  }
+
+  // ============================================================
+  // 主更新
+  // ============================================================
+  function update(dt){
+    updatePlayer(dt);
+    for(const e of enemies) updateEnemy(e, dt);
+    updateShards(dt);
+    updateSpawner(dt);
+
+    // 相机平滑跟随，限制在背景图左右边界内
+    const target = clamp(player.x - VIEW_W / 2, 0, Math.max(0, worldW - VIEW_W));
+    camera.x += (target - camera.x) * Math.min(1, CAM_SMOOTH * dt);
+  }
+
+  // ============================================================
+  // 渲染
+  // ============================================================
+  const tintCanvas = document.createElement('canvas');
+  const tintCtx = tintCanvas.getContext('2d');
+
+  function drawShadow(a){
+    const a2 = (a.alpha == null) ? 1 : a.alpha;
+    if(a2 <= 0.02) return;                                  // 已淡出的尸体不再画影子
+    const rh = a.baseH * a.scale;
+    const lift = Math.max(0, platformY - a.y); // 离地高度
+    const w = rh * 0.42 * (1 - Math.min(0.6, lift / 400));
+    const h = w * 0.22;
+    const x = a.x - camera.x;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0.12, 0.30 - lift * 0.0008) * a2;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.ellipse(x, platformY, w, h, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function renderActor(a){
+    const c = a.clips[a.clip];
+    const img = c.frames[a.frameIndex];
+    if(!img || !img.complete || !img.naturalWidth) return;
+    const alpha = (a.alpha == null) ? 1 : a.alpha;
+    if(alpha <= 0.02) return;                               // 尸体已淡到看不见
+
+    const rh = a.baseH * a.scale;           // 渲染高度（脚底对齐平台）
+    const s = rh / img.naturalHeight;       // 按高度缩放，宽度随各帧真实宽高比变化
+    const dw = img.naturalWidth * s, dh = rh;
+    const sx = a.x - camera.x;
+    // 逐帧下沉修正（目前只有死亡片段用）：见 DEAD_SINK 说明
+    const sink = c.sinkFn ? c.sinkFn(a.frameIndex) : 0;
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(sx, a.y + sink);
+    ctx.scale(a.facing, 1);                 // 朝左时水平翻转
+    if(a.flash > 0){
+      // 受击红色闪烁：先渲染到离屏画布并着色，避免影响背景
+      tintCanvas.width = img.naturalWidth;
+      tintCanvas.height = img.naturalHeight;
+      tintCtx.clearRect(0, 0, img.naturalWidth, img.naturalHeight);
+      tintCtx.drawImage(img, 0, 0);
+      tintCtx.globalCompositeOperation = 'source-atop';
+      tintCtx.fillStyle = 'rgba(255,60,60,' + Math.min(0.85, a.flash * 3).toFixed(3) + ')';
+      tintCtx.fillRect(0, 0, img.naturalWidth, img.naturalHeight);
+      tintCtx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(tintCanvas, -dw / 2, -dh, dw, dh);
+    } else {
+      ctx.drawImage(img, -dw / 2, -dh, dw, dh);
+    }
+    ctx.restore();
+
+    // 死亡的敌人不再显示血条（尸体淡出时血条留在原地会很怪）
+    if(!(a.fadeOnDeath && a.state === 'dead')) drawHpBar(a, sx);
+  }
+
+  function drawHpBar(a, sx){
+    const rh = a.baseH * a.scale;
+    const w = Math.max(36, rh * 0.5), h = 5;
+    const x = sx - w / 2, y = a.y - rh - 10;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
+    const ratio = clamp(a.hp / a.maxHp, 0, 1);
+    ctx.fillStyle = ratio > 0.5 ? '#5bd75b' : (ratio > 0.25 ? '#f5c542' : '#f05a5a');
+    ctx.fillRect(x, y, w * ratio, h);
+  }
+
+  function drawShard(s){
+    const x = s.x - camera.x;
+    const dir = Math.sign(s.vx) || 1;
+    ctx.save();
+    ctx.translate(x, s.y);
+    ctx.scale(dir, 1);
+    const w = s.w, h = s.h;
+    const g = ctx.createLinearGradient(0, -h / 2, 0, h / 2);
+    g.addColorStop(0, '#eaf9ff');
+    g.addColorStop(0.5, '#a8e4ff');
+    g.addColorStop(1, '#3fa9e8');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(w / 2, 0);
+    ctx.lineTo(-w / 2, -h / 2);
+    ctx.lineTo(-w / 4, 0);
+    ctx.lineTo(-w / 2, h / 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 背景平铺绘制：只画视口覆盖到的那几块，偶数块用原图、奇数块用镜像图。
+  // 这样无论相机滚到哪里，视口内的接缝都只是「同一列像素并排」，看不到硬接。
+  function renderBackground(){
+    if(!(bgImg.complete && bgImg.naturalWidth)){
+      ctx.fillStyle = '#222233';
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      return;
+    }
+    const tw = bgTileW();
+    const srcMirror = bgMirrorReady ? bgMirror : bgImg;
+    const right = camera.x + VIEW_W;
+    let n = Math.floor(camera.x / tw);
+    if(n < 0) n = 0;
+    for(; n * tw < right; n++){
+      const x = n * tw;
+      if(x >= worldW) break;                      // 已铺满世界宽度
+      ctx.drawImage((n % 2 === 0) ? bgImg : srcMirror, x - camera.x, 0, tw, VIEW_H);
+    }
+  }
+
+  function render(){
+    ctx.clearRect(0, 0, VIEW_W, VIEW_H);
+
+    // 背景（原图铺满高度后按「A | flip(A) | A | …」横向镜像循环，随相机滚动）
+    renderBackground();
+
+    // 平台顶面基准线（正常模式下为淡色参考线）
+    ctx.strokeStyle = 'rgba(0,0,0,0.16)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, platformY);
+    ctx.lineTo(VIEW_W, platformY);
+    ctx.stroke();
+
+    // 阴影（程序化，半透明）
+    for(const e of enemies) if(!e.removed) drawShadow(e);
+    drawShadow(player);
+
+    // 冰锥
+    for(const s of shards) drawShard(s);
+
+    // 敌人（先画，玩家在上层）
+    for(const e of enemies) if(!e.removed) renderActor(e);
+    renderActor(player);
+
+    if(debug) renderDebug();
+  }
+
+  function renderDebug(){
+    // 亮绿色平台顶面基准线
+    ctx.strokeStyle = '#39ff6b';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, platformY);
+    ctx.lineTo(VIEW_W, platformY);
+    ctx.stroke();
+    ctx.fillStyle = '#39ff6b';
+    ctx.font = 'bold 14px Consolas, monospace';
+    ctx.fillText('平台顶面 Y = ' + platformY.toFixed(0), 10, platformY - 6);
+
+    // 玩家身体碰撞盒（蓝色）
+    drawBox(bodyBox(player), 'rgba(60,120,255,0.35)', '#3f7bff', '玩家碰撞盒');
+    // 冰锥碰撞盒（浅蓝）
+    for(const s of shards) drawBox(shardBox(s), 'rgba(120,200,255,0.40)', '#7fd8ff', '冰锥');
+    // 冰锥枪口段（贴脸时的命中体积，只在攻击过程中显示）
+    if(player.state === 'attack'){
+      drawBox(iceMuzzle(player).box, 'rgba(150,240,255,0.20)', '#9fe8ff', '冰锥枪口段');
+    }
+    // 敌人碰撞盒
+    for(const e of enemies){
+      if(e.removed) continue;
+      drawBox(bodyBox(e), 'rgba(255,60,60,0.35)', '#ff3c3c', '敌人本体');
+      if(e.state === 'attack' && e.frameIndex >= MELEE_START && e.frameIndex <= MELEE_END){
+        drawBox(meleeBox(e), 'rgba(255,120,40,0.45)', '#ff8a2a', '敌人攻击判定');
+      }
+    }
+
+    // 左上角实时调试数据
+    const alive = enemies.filter(e => e.state !== 'dead').length;
+    const lines = [
+      '玩家 XY: ' + player.x.toFixed(1) + ' , ' + player.y.toFixed(1),
+      '玩家水平速度: ' + player.vx.toFixed(1),
+      '相机 X: ' + camera.x.toFixed(1),
+      '冰锥数量: ' + shards.length,
+      '存活敌人: ' + alive,
+    ];
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(8, 8, 320, lines.length * 20 + 10);
+    ctx.fillStyle = '#eafff0';
+    ctx.font = '13px Consolas, monospace';
+    for(let i = 0; i < lines.length; i++) ctx.fillText(lines[i], 16, 30 + i * 20);
+  }
+
+  function drawBox(b, fill, stroke, label){
+    const x = b.x - camera.x, y = b.y;
+    ctx.fillStyle = fill;
+    ctx.fillRect(x, y, b.w, b.h);
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x, y, b.w, b.h);
+    ctx.fillStyle = stroke;
+    ctx.font = '11px Consolas, monospace';
+    ctx.fillText(label, x, y - 3);
+  }
+
+  // ============================================================
+  // 输入
+  // ============================================================
+  const input = { left: false, right: false, shift: false };
+  let jumpQueued = false;
+
+  window.addEventListener('keydown', function(e){
+    const k = e.key.toLowerCase();
+    if(e.code === 'Space'){ e.preventDefault(); if(!e.repeat) jumpQueued = true; }
+    if(k === 'a') input.left = true;
+    if(k === 'd') input.right = true;
+    if(e.key === 'Shift') input.shift = true;
+    if(k === 'q' && !e.repeat) requestAttack();
+    if(e.code === 'Backquote' || e.key === '~' || e.key === '`') toggleDebug();
+    if(k === 'r') resetGame();
+  });
+  window.addEventListener('keyup', function(e){
+    const k = e.key.toLowerCase();
+    if(k === 'a') input.left = false;
+    if(k === 'd') input.right = false;
+    if(e.key === 'Shift') input.shift = false;
+  });
+
+  function toggleDebug(){
+    debug = !debug;
+    debugPanel.style.display = debug ? 'block' : 'none';
+    if(debug) syncDebugPanel();
+  }
+  function resetGame(){
+    player.x = 420; player.y = platformY;
+    player.vx = 0; player.vy = 0; player.facing = 1;
+    player.hp = player.maxHp; player.flash = 0; player.invuln = 0;
+    player.attackCd = 0; player.deadFinished = false;
+    setState(player, 'idle');
+    shards.length = 0;
+    enemies = [];
+    spawnTimer = 0.5;
+  }
+
+  // ============================================================
+  // 调试面板（HTML 滑块）
+  // ============================================================
+  function syncDebugPanel(){
+    document.getElementById('slPlatformY').value = platformY;
+    document.getElementById('slPlayerScale').value = playerScale;
+    document.getElementById('slEnemyScale').value = enemyScale;
+    document.getElementById('slMaxEnemies').value = maxEnemies;
+    document.getElementById('slIceOffX').value = iceOffX;
+    document.getElementById('slIceOffY').value = iceOffY;
+    document.getElementById('slBgTiles').value = bgTiles;
+    refreshDebugLabels();
+  }
+  function refreshDebugLabels(){
+    document.getElementById('vPlatformY').textContent = platformY.toFixed(0);
+    document.getElementById('vPlayerScale').textContent = playerScale.toFixed(2);
+    document.getElementById('vEnemyScale').textContent = enemyScale.toFixed(2);
+    document.getElementById('vMaxEnemies').textContent = maxEnemies;
+    document.getElementById('vIceOffX').textContent = iceOffX;
+    document.getElementById('vIceOffY').textContent = iceOffY;
+    document.getElementById('vBgTiles').textContent = bgTiles;
+  }
+  function initDebugPanel(){
+    document.getElementById('slPlatformY').addEventListener('input', function(){
+      platformY = +this.value; refreshDebugLabels();
+    });
+    document.getElementById('slPlayerScale').addEventListener('input', function(){
+      playerScale = +this.value; refreshDebugLabels();
+    });
+    document.getElementById('slEnemyScale').addEventListener('input', function(){
+      enemyScale = +this.value; refreshDebugLabels();
+    });
+    document.getElementById('slMaxEnemies').addEventListener('input', function(){
+      maxEnemies = +this.value; refreshDebugLabels();
+      let alive = enemies.filter(e => e.state !== 'dead');
+      while(alive.length > maxEnemies){ alive.pop().removed = true; }
+    });
+    document.getElementById('slIceOffX').addEventListener('input', function(){
+      iceOffX = +this.value; refreshDebugLabels();
+    });
+    document.getElementById('slIceOffY').addEventListener('input', function(){
+      iceOffY = +this.value; refreshDebugLabels();
+    });
+    document.getElementById('slBgTiles').addEventListener('input', function(){
+      bgTiles = +this.value;
+      worldW = computeWorldW();               // 立即重建世界宽度
+      camera.x = clamp(camera.x, 0, Math.max(0, worldW - VIEW_W));
+      clampToWorld(player);
+      for(const e of enemies) if(!e.removed) clampToWorld(e);
+      refreshDebugLabels();
+    });
+    syncDebugPanel();
+  }
+
+  // ============================================================
+  // 素材加载
+  // ============================================================
+  const barfill = document.getElementById('barfill');
+  const loadtext = document.getElementById('loadtext');
+  const loadingEl = document.getElementById('loading');
+  let loaded = 0, failed = 0;
+  const total = pending.length;
+
+  pending.forEach(function(p){
+    p.im.addEventListener('load', onImg);
+    p.im.addEventListener('error', onImgErr);
+    p.im.src = p.path;
+  });
+  function onImg(){ loaded++; updateLoad(); }
+  function onImgErr(){ failed++; loaded++; updateLoad(); }
+  function updateLoad(){
+    const pct = Math.floor(loaded / total * 100);
+    barfill.style.width = pct + '%';
+    loadtext.textContent = '加载中 ' + pct + '%'
+      + (failed ? '　⚠ 失败 ' + failed + ' / ' + total + ' 张，素材路径可能不对' : '');
+    if(loaded >= total) startGame();
+  }
+
+  function startGame(){
+    buildBgMirror();                       // 预渲染背景的水平镜像图（平铺用）
+    worldW = computeWorldW();              // 世界宽度 = 单块宽 × 平铺块数
+    enemies = [];
+    for(let i = 0; i < maxEnemies; i++) spawnEnemy();
+    loadingEl.style.display = 'none';
+    initDebugPanel();
+    last = performance.now();
+    requestAnimationFrame(frame);
+  }
+
+  // ============================================================
+  // 固定时间步长游戏循环
+  // ============================================================
+  let last = 0, acc = 0;
+  function frame(now){
+    let dt = (now - last) / 1000;
+    last = now;
+    if(dt > MAX_ACCUM) dt = MAX_ACCUM;
+    acc += dt;
+    let steps = 0;
+    while(acc >= STEP && steps < 20){
+      update(STEP);
+      acc -= STEP;
+      steps++;
+    }
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  // ============================================================
+  // 画布自适应（16:9 居中，无滚动条）
+  // ============================================================
+  function fitCanvas(){
+    const s = Math.min(window.innerWidth / VIEW_W, window.innerHeight / VIEW_H);
+    canvas.style.width = Math.floor(VIEW_W * s) + 'px';
+    canvas.style.height = Math.floor(VIEW_H * s) + 'px';
+  }
+  window.addEventListener('resize', fitCanvas);
+  fitCanvas();
+})();
+</script>
+</body>
+</html>
