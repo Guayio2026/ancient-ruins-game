@@ -1,0 +1,14 @@
+GSAP 3.15.0
+运行用途：标题、菜单、翻页与界面动效。
+实际随包文件：vendor/gsap/gsap.min.js
+官方npm版本：https://registry.npmjs.org/gsap/3.15.0
+官方版本源码：https://github.com/greensock/GSAP/tree/3.15.0
+官方许可链接：https://gsap.com/standard-license
+核对日期：2026-10-23
+
+官方npm该版本package.json声明：Standard 'no charge' license: https://gsap.com/standard-license.
+采用GSAP Standard No Charge License，不是MIT。原库版权声明完整保留。
+
+随附GSAP_3.15.0_package_官方原文.json及GSAP_3.15.0_README_官方原文.txt来自官方npm发布包，已校验包的SHA1与SHA512。该发布包与官方版本源码目录未提供独立LICENSE文件；README保留许可说明和官方条款链接，不是许可条款全文。本次未将许可条款全文归档。
+
+此前官网下载文件实际为反爬验证页，不含许可正文，已从提交附件排除。此处仅说明已取得的原始声明及可用官方许可链接，不把验证页、摘要或自写说明充作官方条款全文。

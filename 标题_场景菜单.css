@@ -1,0 +1,130 @@
+/* 场景式冰雪主菜单：沿用独立加载与凝霜动画。 */
+#titleScreen:has(#titleAchievements) .titleMenu{gap:clamp(6px,1.1vh,10px)}
+#titleScreen:has(#titleAchievements) .titleMenu button{min-height:clamp(34px,5vh,48px);padding-top:7px;padding-bottom:7px}
+#titleScreen{background:#06101b url('artwork/主菜单_冰雪门庭_v2.png') center/cover no-repeat;cursor:default;overflow:hidden}
+.titleBackgroundVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none}
+#titleScreen:before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#020a13cf 0%,#04111c80 30%,transparent 65%),linear-gradient(0deg,#0208119c,transparent 30%);z-index:-1;pointer-events:none}
+#titleScreen #introArtwork{left:3vw;top:5vh;transform:none;width:min(49vw,650px);height:auto}
+#titleScreen .titleMenu{position:absolute;left:9vw;top:43%;width:clamp(220px,24vw,340px);display:grid;gap:clamp(8px,1.7vh,18px);opacity:0;transform:translateY(12px);transition:opacity 1s,transform 1s;pointer-events:none}
+#titleScreen.ready .titleMenu{opacity:1;transform:none;pointer-events:auto}
+#titleScreen .titleMenu button{position:relative;inset:auto;transform:none;margin:0;visibility:visible;opacity:1;animation:none;display:flex;align-items:center;gap:20px;width:100%;min-height:clamp(42px,7vh,68px);padding:10px 24px;border:1px solid #86becb88;border-radius:3px 18px 3px 18px;background:linear-gradient(110deg,#0b2331ed,#081721de);color:#badce6;font:clamp(16px,1.6vw,23px) 'STKaiti','KaiTi',serif;letter-spacing:5px;text-shadow:0 0 12px #62b6d455;box-shadow:inset 0 0 0 3px #06131b,inset 0 0 0 4px #54849655,0 4px 18px #0005;cursor:pointer;transition:background .2s,border-color .2s,translate .2s}
+#titleScreen .titleMenu button span{font-size:1.3em;letter-spacing:0;color:#9fdce9}
+#titleScreen .titleMenu button small{position:absolute;right:18px;bottom:5px;font:9px 'Microsoft YaHei',sans-serif;letter-spacing:3px;color:#8bb5c6}
+#titleScreen .titleMenu button:hover,#titleScreen .titleMenu button:focus-visible{background:#204d63ee;border-color:#e2fcff;translate:5px 0;outline:2px solid #b9efff;outline-offset:4px}
+#titleScreen > .t-line{left:9vw;top:auto;bottom:10%;width:28vw;transform:none;text-align:left;font:clamp(11px,1.1vw,15px)/1.9 'KaiTi',serif;letter-spacing:3px;color:#a3c6d6}
+#titleScreen.written > .t-line{transform:none;animation:none}
+.titleEdition{position:absolute;left:9vw;bottom:5%;font-size:9px;letter-spacing:3px;color:#7397a9}.titleEdition i{display:inline-block;width:24px;border-top:1px solid #7397a9;vertical-align:middle;margin:0 12px}
+#titleSoundDialog{background:#0a2032;color:#d6f5ff;border:1px solid #83c7e0;padding:26px;border-radius:12px;width:320px}
+#titleSoundDialog::backdrop{background:#020913c9;backdrop-filter:blur(5px)}
+body:not(.playing) #titleSoundHost #audioPanel{display:block;position:relative;inset:auto;width:100%;max-width:none;margin-bottom:20px}
+#titleSoundDialog form button{background:#163f59;border:1px solid #86c8da;color:#ddfaff;padding:10px 20px;cursor:pointer}
+@media(max-width:650px){#titleScreen{background-position:62% center}#titleScreen #introArtwork{left:-10vw;top:7vh;width:95vw}#titleScreen .titleMenu{left:8vw;top:42%;width:65vw;max-width:300px}#titleScreen > .t-line{left:8vw;width:80vw;bottom:9%}.titleEdition{left:8vw;bottom:4%}}
+@media(max-height:500px) and (min-width:651px){#titleScreen #introArtwork{top:-3vh;width:42vw}#titleScreen .titleMenu{top:37%;gap:7px}#titleScreen .titleMenu button{min-height:35px;padding:5px 20px;font-size:16px}#titleScreen > .t-line{bottom:7%;font-size:10px}.titleEdition{bottom:2%}}
+@media(prefers-reduced-motion:reduce){#titleScreen .titleMenu{transition:none}}
+#titleScreen .titleMenu button{isolation:isolate;overflow:hidden}
+#titleScreen .titleMenu .menuFrost{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;border-radius:inherit}
+@media(max-width:650px){.titleBackgroundVideo{object-position:62% center}}
+/* 冰晶徽记与凝霜标题共用1000×440坐标，缩放时保持相对位置。 */
+#titleScreen #titleIceEmblem{position:absolute;left:3vw;top:5vh;width:min(49vw,650px);height:auto;aspect-ratio:1000/440;pointer-events:none;opacity:1;filter:drop-shadow(0 0 5px #8dcfe52b)}
+#titleScreen.written #titleIceEmblem{opacity:1;filter:drop-shadow(0 0 5px #8dcfe52b)}
+#titleIceEmblem .iceBadge{opacity:0;visibility:hidden;transition:opacity .4s ease}
+#titleScreen.introStarted .iceBadge{opacity:1;visibility:visible}
+#titleScreen.titleGsap .iceBadge{transition:none}
+#titleIceEmblem .titleOrnamentDetail{opacity:0;transition:opacity .45s ease}
+#titleScreen.written .titleOrnamentDetail{opacity:1}
+.titleMotion #titleScreen.introStarted #titleIceEmblem :is(.iceOrbit,.iceCounterOrbit,.iceHeart,.iceHalo,.iceGlimmer){animation-play-state:running}
+@media(prefers-reduced-motion:reduce){#titleIceEmblem .iceBadge,#titleIceEmblem .titleOrnamentDetail{transition:none}}
+@media(max-width:650px){#titleScreen #titleIceEmblem{left:-10vw;top:7vh;width:95vw}}
+@media(max-height:500px) and (min-width:651px){#titleScreen #titleIceEmblem{top:-3vh;width:42vw}}
+@media(prefers-reduced-motion:reduce){#titleScreen #titleIceEmblem{transition:none}}
+#titleScreen.ready.written .titleMenu .t-press{animation:none;opacity:1}
+@media(max-width:650px) and (max-height:650px){
+  #titleScreen #introArtwork,#titleScreen #titleIceEmblem{left:-5vw;top:2vh;width:82vw}
+  #titleScreen > .t-line{display:none}
+}
+/* 冰雪牌匾：双层折线边框与四种独立纹饰，中央留给文字。 */
+#titleScreen .titleMenu button{padding-left:36px;padding-right:36px;gap:16px;border-color:transparent;border-radius:16px;background:linear-gradient(110deg,#102b39ed,#071722ed);box-shadow:0 4px 18px #0005}
+#titleScreen .titleMenu button::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:-1;background:center/100% 100% no-repeat;opacity:.88;transition:opacity .2s,filter .2s}
+#titleScreen .titleMenu :is(#continueJourney,.t-press,#titleAchievements)::after{background-image:url('artwork/标题_冰刻版/按钮纹饰_霜枝.svg')}
+#titleScreen .titleMenu #titleControls::after{background-image:url('artwork/标题_冰刻版/按钮纹饰_冰花.svg')}
+#titleScreen .titleMenu #titleSound::after{background-image:url('artwork/标题_冰刻版/按钮纹饰_冰羽.svg')}
+#titleScreen .titleMenu #titleLore::after{background-image:url('artwork/标题_冰刻版/按钮纹饰_晶棱.svg')}
+#titleScreen .titleMenu button:hover,#titleScreen .titleMenu button:focus-visible{border-color:transparent}
+#titleScreen .titleMenu button:hover::after,#titleScreen .titleMenu button:focus-visible::after{opacity:1;filter:drop-shadow(0 0 3px #a4e6ff88)}
+#titleScreen .titleMenu button small{right:36px;bottom:8px;font-size:8px;letter-spacing:2px}
+/* 仅徽记本体运动；霜环反向慢转，中心晶核呼吸，碎冰错峰闪亮。 */
+#titleIceEmblem .iceOrbit,#titleIceEmblem .iceCounterOrbit,#titleIceEmblem .iceHeart,#titleIceEmblem .iceHalo{transform-box:view-box;transform-origin:218px 180px}
+#titleIceEmblem .iceOrbit{animation:emblemOrbit 38s linear infinite paused}
+#titleIceEmblem .iceCounterOrbit{animation:emblemOrbit 57s linear infinite reverse paused}
+#titleIceEmblem .iceHeart{animation:emblemHeart 5.8s ease-in-out infinite paused,emblemOrbit 38s linear infinite paused}
+#titleIceEmblem .iceHalo{animation:emblemHalo 5.8s ease-in-out infinite paused}
+#titleIceEmblem .iceGlimmer{transform-box:fill-box;transform-origin:center;animation:emblemGlimmer 6.4s ease-in-out infinite paused}
+#titleIceEmblem .iceGlimmerB{animation-duration:7.7s;animation-delay:-2.9s}
+#titleIceEmblem .iceGlimmerC{animation-duration:5.9s;animation-delay:-4.3s}
+#titleIceEmblem .frostUnfold{transform-box:view-box;transform-origin:339px 324px;animation:emblemUnfold 3.4s cubic-bezier(.22,.61,.36,1) .15s both paused}
+#titleIceEmblem .frostRuleReveal{transform-box:view-box;transform-origin:500px 362px;animation:emblemRuleReveal 3.2s cubic-bezier(.22,.61,.36,1) .35s both paused}
+#titleIceEmblem .frostRuleGem{animation:emblemRuleGem .8s ease-out both paused}
+.titleMotion #titleScreen.written #titleIceEmblem :is(.iceOrbit,.iceCounterOrbit,.iceHeart,.iceHalo,.iceGlimmer,.frostUnfold,.frostRuleReveal,.frostRuleGem){animation-play-state:running}
+@keyframes emblemRuleReveal{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes emblemRuleGem{from{opacity:0}to{opacity:1}}
+@keyframes emblemUnfold{0%{opacity:0;transform:perspective(520px) rotateY(-78deg) scaleX(.2)}22%{opacity:.8}100%{opacity:1;transform:perspective(520px) rotateY(0deg) scaleX(1)}}
+@keyframes emblemOrbit{to{transform:rotate(360deg)}}
+@keyframes emblemHeart{0%,100%{opacity:.72}50%{opacity:1}}
+@keyframes emblemHalo{0%,100%{opacity:.5;transform:scale(.94)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes emblemGlimmer{0%,45%,100%{opacity:.25;transform:scale(.75)}65%{opacity:1;transform:scale(1.2)}80%{opacity:.5;transform:scale(.9)}}
+@media(prefers-reduced-motion:reduce){#titleIceEmblem :is(.iceOrbit,.iceCounterOrbit,.iceHeart,.iceHalo,.iceGlimmer,.frostUnfold,.frostRuleReveal,.frostRuleGem){animation:none}}
+#titleIceEmblem .iceHeart{filter:drop-shadow(0 0 2px #adebff55)}
+#titleScreen.titleGsap .titleMenu{transition:none;transform:none}
+#titleScreen .titleMenu{visibility:hidden}
+#titleScreen .titleMenu button{visibility:inherit}
+#titleScreen.ready .titleMenu{visibility:visible}
+#frostPointerTrail{position:fixed;inset:0;z-index:80;pointer-events:none;overflow:hidden;contain:strict}
+#frostPointerTrail i{position:absolute;left:0;top:0;display:block;pointer-events:none;visibility:hidden}
+#frostPointerTrail .frostPointerGlow{width:24px;height:24px;margin:-12px;background:radial-gradient(circle,#e2fbff70, #8cddff20 30%,transparent 70%);border-radius:50%}
+#frostPointerTrail .frostPointerParticle{width:10px;height:10px}
+#frostPointerTrail .isActive{will-change:transform,opacity}
+#frostPointerTrail .snowCrystal{width:15px;height:15px;margin:-2.5px;background:url('artwork/标题_冰刻版/鼠标_冰晶.svg') center/contain no-repeat}
+#frostPointerTrail .iceShard{background:linear-gradient(135deg,#efffff,#7ebee1);clip-path:polygon(50% 4%,76% 50%,50% 96%,24% 50%)}
+#frostPointerTrail .snowDust{background:radial-gradient(circle,#efffff 0 12%,#a6dcf470 22%,transparent 50%)}
+/* 标题文字、花纹与菜单使用同一条视觉中轴；徽记留在标题左侧。 */
+#titleScreen{--menu-left:9vw;--menu-width:clamp(220px,24vw,340px);--brand-width:min(49vw,650px);--brand-top:5vh;--menu-top:43%}
+#titleScreen #introArtwork,#titleScreen #titleIceEmblem{left:calc(var(--menu-left) + (var(--menu-width) - var(--brand-width))/2);top:var(--brand-top);width:var(--brand-width)}
+#titleScreen .titleMenu{left:var(--menu-left);width:var(--menu-width);max-width:none;top:var(--menu-top)}
+#titleScreen > .t-line{left:auto;right:var(--menu-left);width:var(--menu-width);text-align:right;font-size:clamp(11px,1vw,14px);letter-spacing:1.4px;line-height:1.9}
+#titleScreen .titleEdition{left:auto;right:var(--menu-left);text-align:right;font-size:8px;letter-spacing:2.5px}
+#titleScreen.titleGsap .titleMenu button:hover,#titleScreen.titleGsap .titleMenu button:focus-visible{translate:none;outline:none}
+#titleScreen.titleGsap .titleMenu button:focus-visible{outline:1px solid #b9efffaa;outline-offset:4px}
+#titleScreen .titleMenu .menuIceTrace{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:1}
+#titleScreen .titleMenu .menuIceTrace path{fill:none;stroke:#d9faff;stroke-width:1.7;stroke-dasharray:1;stroke-dashoffset:1;opacity:0;visibility:hidden}
+#frostGateTransition{position:fixed;inset:0;z-index:100;overflow:hidden;background:#0b2032;visibility:hidden;opacity:0;pointer-events:auto;contain:strict}
+#frostGateTransition i{position:absolute;inset:-25%;background:radial-gradient(ellipse at 35% 55%,#b1e7f37a,transparent 55%),radial-gradient(ellipse at 70% 35%,#7eb9d099,transparent 50%);will-change:transform}
+#frostGateTransition i:nth-child(2){background:radial-gradient(ellipse at 60% 70%,#d3f2f855,transparent 48%);rotate:15deg}
+#frostGateTransition i:nth-child(3){background:radial-gradient(ellipse at 45% 40%,#e5faff55,transparent 48%);rotate:-15deg}
+@media(max-width:650px){#titleScreen{--menu-left:8vw;--menu-width:min(65vw,300px);--brand-width:95vw;--brand-top:7vh;--menu-top:42%}}
+@media(max-width:650px) and (max-height:650px){#titleScreen{--brand-width:82vw;--brand-top:2vh}}
+@media(max-height:500px) and (min-width:651px){#titleScreen{--brand-width:42vw;--brand-top:-3vh;--menu-top:37%}}
+/* 标题雪粒也跟随统一的播放状态，弹窗或失焦时不在后台继续运行。 */
+#titleScreen .introSnow span{animation-play-state:paused}
+.titleMotion #titleScreen .introSnow span{animation-play-state:running}
+#controlsDialog,#titleSoundDialog{overscroll-behavior:contain}
+#titleScreen button,#titleSoundDialog button,#controlsDialog button{touch-action:manipulation;-webkit-tap-highlight-color:#b0e7ff33}
+@media(max-height:420px){
+  #titleScreen{--brand-width:min(80vw,100vh);--brand-top:-2vh;--menu-top:40%}
+  #titleScreen .titleMenu{gap:6px}
+  #titleScreen .titleMenu button{min-height:32px;padding:5px 32px;font-size:14px;letter-spacing:3px;gap:12px}
+    #titleScreen .titleMenu button small{font-size:7px;bottom:5px;right:32px}
+  #titleScreen > .t-line{display:none}
+  #titleScreen .titleEdition{bottom:3%}
+}
+@media(max-height:300px){
+  #titleScreen{--brand-width:80vh;--menu-top:35%}
+  #titleScreen .titleMenu{gap:5px}
+  #titleScreen .titleMenu button{min-height:30px;padding-block:3px;line-height:1.1}
+    #titleScreen .titleEdition{display:none}
+}
+/* 加载进度用transform更新，角色仅在切换到新精灵帧时重绘。 */
+#loading .bar #barfill{width:100%;transform:scaleX(0);transform-origin:left center}
+#loading #loadingRunner{left:calc(50% - clamp(240px,25vw,480px)/2);transform:translateX(0);will-change:transform}
+#loadProgress{width:min(92vw,520px)}
+#loading .introSnow span,#loading .bar div::after{animation-play-state:paused}
+.loadingMotion #loading .introSnow span,.loadingMotion #loading .bar div::after{animation-play-state:running}

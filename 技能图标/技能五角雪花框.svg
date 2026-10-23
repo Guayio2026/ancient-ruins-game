@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="280" viewBox="0 0 300 280">
+<defs>
+  <radialGradient id="halo"><stop stop-color="#53d6ff" stop-opacity=".24"/><stop offset="1" stop-color="#53d6ff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="ice" x2=".3" y2="1"><stop stop-color="#e2fbff"/><stop offset=".5" stop-color="#53bce9"/><stop offset="1" stop-color="#a6f3ff"/></linearGradient>
+  <g id="arm"><path d="M150 140V14 M150 48L133 29 M150 48L167 29 M150 78L121 52 M150 78L179 52" fill="none" stroke-linecap="square" stroke-linejoin="miter"/><path d="M150 8l5 11-5 11-5-11z" fill="#dbfaff" stroke="none"/></g>
+</defs>
+<ellipse cx="150" cy="140" rx="147" ry="134" fill="url(#halo)"/>
+<g stroke="#071b32" stroke-width="9"><use href="#arm"/><use href="#arm" transform="rotate(72 150 140)"/><use href="#arm" transform="rotate(144 150 140)"/><use href="#arm" transform="rotate(216 150 140)"/><use href="#arm" transform="rotate(288 150 140)"/></g>
+<g stroke="url(#ice)" stroke-width="3"><use href="#arm"/><use href="#arm" transform="rotate(72 150 140)"/><use href="#arm" transform="rotate(144 150 140)"/><use href="#arm" transform="rotate(216 150 140)"/><use href="#arm" transform="rotate(288 150 140)"/></g>
+<path d="M150 83l54 39-20 64h-68l-20-64z" fill="#0b2844" fill-opacity=".65" stroke="#80dfff" stroke-opacity=".7"/>
+</svg>

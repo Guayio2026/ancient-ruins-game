@@ -1,0 +1,20 @@
+/* Unframed ice lettering. The original death pose stays visible behind it. */
+#deathScreen{position:fixed;inset:0;box-sizing:border-box;width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;padding:clamp(18px,5vh,60px) 20px;border:0;background:transparent;color:#d8f5ff;overflow:auto;font-family:var(--frost-title-font,'KaiTi','Microsoft YaHei',serif);text-align:center;outline:none}
+#deathScreen::backdrop{background:linear-gradient(180deg,#03101c80,#051424cc 45%,#04101ed9)}
+#deathScreen .deathCopy{min-height:calc(100% - 12px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;text-shadow:0 2px 4px #03111f,0 0 16px #6ccaff75;animation:deathCopyIn .6s ease-out both}
+.deathCrystal{font:clamp(45px,7vw,72px)/1.25 serif;color:#afebff;filter:drop-shadow(0 0 12px #72cfff80)}
+#deathScreen .deathEyebrow{margin:12px 0 15px;font:11px/1.4 Georgia,serif;letter-spacing:6px;color:#9fc9de}
+#deathScreen h1{margin:0;font-size:clamp(36px,6vw,64px);font-weight:400;letter-spacing:.24em;padding-left:.24em;color:#e0f7ff}
+#deathScreenDescription{white-space:pre-line;margin:24px 0 30px;font-size:clamp(15px,2vw,19px);line-height:1.9;letter-spacing:1px;color:#b8d7e7}
+#deathScreen .deathActions{display:flex;flex-wrap:wrap;justify-content:center;gap:16px 46px}
+#deathScreen button{position:relative;box-sizing:border-box;min-height:50px;padding:10px 16px;border:0;border-radius:0;background:transparent;box-shadow:none;color:#bdeaff;font:20px/1.5 var(--frost-title-font,'KaiTi',serif);letter-spacing:2px;cursor:pointer;text-shadow:inherit;transition:color .18s,text-shadow .18s}
+#deathScreen button::after{content:'';position:absolute;left:12%;right:12%;bottom:3px;height:1px;background:linear-gradient(90deg,transparent,#bfefff,transparent);opacity:.3;transform:scaleX(.65);transition:opacity .18s,transform .18s}
+#deathScreen button:hover,#deathScreen button:focus-visible{color:#fff;text-shadow:0 0 9px #93e6ff,0 0 24px #55bfff;outline:1px dashed #9cd9ef;outline-offset:5px}
+#deathScreen button:hover::after,#deathScreen button:focus-visible::after{opacity:.9;transform:scaleX(1)}
+#deathScreen button:disabled{opacity:.5;cursor:wait}
+#deathScreen .deathKeys{margin:24px 0 0;font:12px/1.7 'Microsoft YaHei',sans-serif;color:#8aafc4;letter-spacing:1px}
+#deathScreenStatus{min-height:24px;margin:14px 0 0;font:13px/1.8 'Microsoft YaHei',sans-serif;color:#c8eaff}
+body.player-defeated #skillBar,body.player-defeated #supportDiamond,body.player-defeated #levelBtns,body.player-defeated #helpButton,body.player-defeated #audioPanel,body.player-defeated #saveExitButton,body.player-defeated #saveMemoryToast,body.player-defeated #loreHint,body.player-defeated #growthNotice,body.player-defeated #echoRunPanel{visibility:hidden!important;pointer-events:none!important}
+@keyframes deathCopyIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:480px){#deathScreen .deathActions{flex-direction:column;gap:12px}#deathScreenDescription{margin:20px 0}#deathScreen h1{letter-spacing:.16em;padding-left:.16em}#deathScreen .deathKeys{font-size:11px;letter-spacing:0}}
+@media(prefers-reduced-motion:reduce){#deathScreen .deathCopy{animation:none}#deathScreen button,#deathScreen button::after{transition:none}}

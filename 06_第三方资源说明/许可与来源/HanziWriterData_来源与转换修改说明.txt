@@ -1,0 +1,11 @@
+资源：hanzi-writer-data 字符笔画中线数据
+来源：https://github.com/chanind/hanzi-writer-data
+官方许可说明：https://hanziwriter.org/license.html
+上游来源：Make Me a Hanzi / Arphic Technology
+版权：Copyright 1999 Arphic Technology Co., Ltd.; Copyright 2016 Shaunak Kishore（上游来源声明）
+数据许可：Arphic Public License；与Hanzi Writer程序本身的MIT许可分开。
+本项目用途：标题“霜语”“遗迹之下”的逐笔书写遮罩。
+实际文件：字笔顺数据.js
+转换说明：现有文件注释与数据表明，提取所需汉字的笔画中线，按照标题图片坐标与宽高归一化，增加遮罩宽度、图片尺寸和每字笔画数，导出供Canvas使用的JavaScript数据。没有在游戏中分发完整字体文件或Hanzi Writer运行库。
+原始生成时间：现有文件保存时间为2026-10-16；本次资料整理与许可补充日期为2026-10-23。不得把保存时间当作无法另行核实的精确首次创作时间。
+原始英文与中文授权书未修改随附；转换数据按同一APL保留其再分发、修改权利。APL不自动覆盖可识别为独立作品的其他游戏代码。

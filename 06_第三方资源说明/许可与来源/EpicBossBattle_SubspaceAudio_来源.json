@@ -1,0 +1,12 @@
+{
+  "title": "Epic Boss Battle [Seamlessly Looping]",
+  "author": "Juhani Junkala / SubspaceAudio",
+  "source": "https://opengameart.org/content/boss-battle-music",
+  "download": "https://opengameart.org/sites/default/files/Juhani%20Junkala%20-%20Epic%20Boss%20Battle%20%5BSeamlessly%20Looping%5D.wav",
+  "license": "CC0 1.0",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "retrieved": "2026-10-23",
+  "modifications": "Original seamless loop converted to OGG Vorbis q5; gain -4 dB; no trimming or time changes",
+  "original_sha256": "35F75B4381DFBB053992876F7DFC567D9FD959D61B73954D5B1CD519753E7DF1",
+  "ogg_sha256": "55A964E3B2C98771504AF844129E655B07531BE47DFF187DA73A58B9234905EE"
+}

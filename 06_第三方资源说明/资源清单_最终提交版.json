@@ -1,0 +1,311 @@
+{
+  "work_name": "霜语：遗迹之下",
+  "work_number": "351328",
+  "date": "2026-10-23",
+  "scope": "本次提交包实际采用的主要第三方资源、AI图像及保留配音来源；仅将菜单和探索原未知许可配乐替换为CC0，保留角色配音与现有演示视频原声音轨。",
+  "audio_final_verification": "音频代理已确认保留现有角色原片段、Qwen3-TTS与英语播报、原王冠音效混轨；仅菜单和探索配乐副本替换为Unexplored。配音参考、角色外观相关未明确授权问题仍按条目保留。",
+  "identity": "学生分工使用成员A/B，来源权利方署名按许可保留。",
+  "items": [
+    {
+      "id": "GSAP",
+      "name": "GSAP 3.15.0",
+      "type": "runtime_code",
+      "source": "https://gsap.com/",
+      "license": "GSAP Standard No Charge License",
+      "authorization_status": "官方许可链接及官方npm该版本许可声明已核对；随库版权声明保留；未归档条款全文。",
+      "uses": [
+        "标题菜单、选择翻页、界面动效"
+      ],
+      "runtime_files": [
+        "vendor/gsap/gsap.min.js"
+      ],
+      "evidence": [
+        "GSAP_随库原始版权声明.txt",
+        "GSAP_3.15.0_package_官方原文.json",
+        "GSAP_3.15.0_README_官方原文.txt",
+        "GSAP_来源与许可说明.txt",
+        "GSAP_3.15.0_来源与校验记录.json"
+      ]
+    },
+    {
+      "id": "hanzi_strokes",
+      "name": "hanzi-writer-data字符笔画中线",
+      "type": "modified_data",
+      "source": "https://github.com/chanind/hanzi-writer-data",
+      "license": "Arphic Public License",
+      "authorization_status": "上游许可允许依条款使用与修改；本次补齐原文、来源与转换说明",
+      "uses": [
+        "标题逐笔书写遮罩"
+      ],
+      "runtime_files": [
+        "字笔顺数据.js"
+      ],
+      "modifications": "提取所需字符中线、按标题图片宽高与坐标归一化、增加遮罩及每字笔画配置。",
+      "evidence": [
+        "ARPHICPL_English_original.txt",
+        "ARPHICPL_中文原文.txt",
+        "HanziWriterData_来源与转换修改说明.txt"
+      ]
+    },
+    {
+      "id": "effect_references",
+      "name": "PixiJS Filters / FidelityFX CAS / Slash Shader",
+      "type": "modified_effects_and_processing",
+      "source": [
+        "https://github.com/pixijs/filters",
+        "https://github.com/GPUOpen-Effects/FidelityFX-CAS",
+        "https://github.com/priyanshsingh102005/Fiery-Slash-Shader-for-Godot-Dynamic-Sword-Trail-VFX-3D-"
+      ],
+      "license": "MIT",
+      "authorization_status": "已保存对应版权及许可；保留实际效果与处理参考",
+      "uses": [
+        "王冠终式辉光、冲击波、斩光及局部关键帧锐化"
+      ],
+      "runtime_files": [
+        "王冠_终式.js",
+        "artwork/王冠终式_游戏_v3/"
+      ],
+      "evidence": [
+        "PixiJS_Filters_MIT_LICENSE_original.txt",
+        "FidelityFX_CAS_MIT_LICENSE_original.txt",
+        "SlashShader_MIT_LICENSE_original.txt",
+        "效果处理_来源与修改说明.txt"
+      ]
+    },
+    {
+      "id": "music_unexplored",
+      "name": "Unexplored (short ver.)",
+      "author": "TAD",
+      "type": "music",
+      "source": "https://opengameart.org/content/unexplored-short-ver-orchestra-music",
+      "license": "CC0 1.0",
+      "authorization_status": "作者发布页许可记录已保存",
+      "uses": [
+        "标题、探索与王冠演出配乐"
+      ],
+      "evidence": [
+        "Unexplored_TAD_来源.json"
+      ]
+    },
+    {
+      "id": "music_heartfelt",
+      "name": "Heartfelt Battle",
+      "author": "request",
+      "type": "music",
+      "source": "https://opengameart.org/content/heartfelt-battle-loopable-fantasy-stringspianohorn",
+      "license": "CC0",
+      "authorization_status": "作者发布页许可记录已保存",
+      "uses": [
+        "普通战斗"
+      ],
+      "evidence": [
+        "HeartfeltBattle_request_来源.txt"
+      ]
+    },
+    {
+      "id": "music_boss",
+      "name": "Epic Boss Battle [Seamlessly Looping]",
+      "author": "Juhani Junkala / SubspaceAudio",
+      "type": "music",
+      "source": "https://opengameart.org/content/boss-battle-music",
+      "license": "CC0 1.0",
+      "authorization_status": "作者发布页许可及原文件校验记录已保存",
+      "uses": [
+        "Boss战斗"
+      ],
+      "modifications": "WAV转OGG，降低4dB。",
+      "evidence": [
+        "EpicBossBattle_SubspaceAudio_来源.json"
+      ]
+    },
+    {
+      "id": "kenney_interface",
+      "name": "Kenney Interface Sounds",
+      "author": "Kenney",
+      "type": "sound_effect",
+      "source": "https://github.com/Calinou/kenney-interface-sounds",
+      "license": "CC0",
+      "authorization_status": "素材原许可及文件校验记录已保存",
+      "uses": [
+        "菜单悬停、确认"
+      ],
+      "evidence": [
+        "KenneyInterface_原始许可.txt",
+        "KenneyInterface_来源.json"
+      ]
+    },
+    {
+      "id": "kenney_impact",
+      "name": "Kenney Impact Sounds",
+      "author": "Kenney",
+      "type": "sound_effect",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0 1.0",
+      "authorization_status": "原始CC0许可及来源记录已保存",
+      "uses": [
+        "Boss重击、脚步、破甲及现有王冠演出撞击/冰晶音效层"
+      ],
+      "evidence": [
+        "KenneyImpact_CC0_original.txt",
+        "CC0音效_来源与处理说明.txt"
+      ]
+    },
+    {
+      "id": "wyzowl",
+      "name": "Wyzowl SFX Kit",
+      "author": "Wyzowl",
+      "type": "sound_effect",
+      "source": "https://github.com/wyzowl/sfx-kit",
+      "license": "CC0 1.0",
+      "authorization_status": "原始CC0许可及来源记录已保存",
+      "uses": [
+        "Boss风压及现有王冠演出风压、上升、闪烁、撞击和提示音层"
+      ],
+      "evidence": [
+        "WyzowlSFXKit_CC0_original.txt",
+        "CC0音效_来源与处理说明.txt"
+      ]
+    },
+    {
+      "id": "monster_roar",
+      "name": "Deep Monster Roar",
+      "author": "trazzz123",
+      "type": "sound_effect",
+      "source": "https://opengameart.org/content/cc0-deep-monster-roar",
+      "license": "CC0 1.0",
+      "authorization_status": "原作者发布页来源及项目处理记录已核对",
+      "uses": [
+        "Boss怪物怒吼"
+      ],
+      "evidence": [
+        "CC0音效_来源与处理说明.txt"
+      ]
+    },
+    {
+      "id": "icy_wind",
+      "name": "Icy Heights / icy_wind.ogg",
+      "author": "Écrivain",
+      "type": "ambience",
+      "source": [
+        "https://opengameart.org/content/icy-heights",
+        "https://github.com/ValyriaTear/ValyriaTear/blob/1c882efff325c941c59aa59c93fb1256258ac845/data/music/icy_wind.ogg"
+      ],
+      "license": "CC0",
+      "authorization_status": "项目来源记录与上游LICENSES对应条目一致",
+      "uses": [
+        "王冠演出飞雪风声"
+      ],
+      "evidence": [
+        "IcyHeights_风声来源.json"
+      ]
+    },
+    {
+      "id": "ai_visuals",
+      "name": "人物、剑、场景、动作与界面AI辅助视觉素材",
+      "type": "ai_generated_or_edited_visuals",
+      "source": "据团队说明，角色图由成员A通过ComfyUI工作流生成，并经筛选、修改和游戏适配；项目其它图像与动画记录涉及Qwen Image、内置imagegen及百炼万相。ComfyUI用于组织相关生成与处理工作流。",
+      "license": "生成工具使用条件与参考输入许可分别记录",
+      "authorization_status": "人物视觉参考关联已记录；相关参考设计的许可适用范围尚未核实。",
+      "uses": [
+        "角色两种形态、选人、头像、对白、技能、场景、王冠演出与结局CG"
+      ],
+      "reference_association": "项目历史资料中存有与《无职转生》角色洛琪希相关的视觉参考信息；本次版本沿用现有AI生成和处理后的形象，相关参考设计的许可适用范围尚未核实。",
+      "sword_note": "有AI生成冰晶巨剑记录；历史保存过图库剑造型参考，不将保存过参考资料等同于每个最终成品均直接以其为输入。",
+      "evidence": [
+        "角色与AI图像_来源状态说明.txt"
+      ]
+    },
+    {
+      "id": "kenney_rpg",
+      "name": "Kenney RPG Audio",
+      "author": "Kenney",
+      "type": "sound_effect",
+      "source": "https://github.com/Boyquotes/kenney-rpg-audio-for-godot",
+      "license": "CC0 1.0",
+      "authorization_status": "原始CC0许可与实际素材来源记录已保存",
+      "uses": [
+        "王冠拔刃、刀剑划动、金属点击等混音层"
+      ],
+      "evidence": [
+        "KenneyRPG_CC0_original.txt",
+        "CC0音效_来源与处理说明.txt"
+      ]
+    },
+    {
+      "id": "oculus_audio",
+      "name": "Oculus Audio Pack 01",
+      "author": "Oculus VR, LLC",
+      "type": "sound_effect",
+      "source": "https://developers.meta.com/vr/downloads/package/oculus-audio-pack-1/",
+      "license": "CC BY 4.0",
+      "authorization_status": "保留原始许可、权利方署名、来源链接和修改说明",
+      "uses": [
+        "王冠剑斩、剑刃碰撞与冰羽峰值破裂"
+      ],
+      "modifications": "裁切、变速、EQ、立体声与分层混音",
+      "evidence": [
+        "OculusAudioPack_CC_BY_4_0_LICENSE_original.txt",
+        "OculusAudioPack_来源与处理.json",
+        "OculusAudioPack_音效署名.txt",
+        "OculusAudioPack_剑斩署名.txt"
+      ]
+    },
+    {
+      "id": "existing_character_voice",
+      "name": "用户提供的既有游戏角色语音片段",
+      "type": "recorded_voice_reference_or_excerpt",
+      "source": "用户提供的既有游戏角色音频；来源及权利方未完整提供",
+      "license": "原音许可资料尚未核实",
+      "authorization_status": "当前保留处理后的片段，来源见配套记录。",
+      "uses": [
+        "现有角色语音片段"
+      ],
+      "runtime_files": [
+        "音频/voice-sprite.js"
+      ],
+      "evidence": [
+        "人物配音与TTS_来源状态说明.txt"
+      ]
+    },
+    {
+      "id": "qwen_character_voice",
+      "name": "Qwen3-TTS角色日语合成配音",
+      "type": "ai_speech_with_external_voice_reference",
+      "source": "成员A配置台词并操作本地Qwen3-TTS，使用已有游戏角色音频作音色参考。",
+      "license": "模型使用条件与声音参考许可分别记录",
+      "authorization_status": "合成过程有记录；原音与音色参考的许可资料尚未核实。",
+      "uses": [
+        "角色剧情日语、战斗喊声、附魔及王冠终式语音"
+      ],
+      "runtime_files": [
+        "音频/clone-voice-sprite.js",
+        "音频/enchant-voice-sprite.js",
+        "artwork/王冠终式_游戏_v3/"
+      ],
+      "evidence": [
+        "人物配音与TTS_来源状态说明.txt"
+      ]
+    },
+    {
+      "id": "qwen_english_announcer",
+      "name": "Qwen3-TTS英语FINISH/WIN播报",
+      "type": "ai_speech",
+      "source": "https://opengameart.org/node/78368",
+      "reference_source": "https://opengameart.org/node/78368",
+      "reference_asset_license": "CC0 1.0",
+      "authorization_status": "参考素材许可记录已保存。",
+      "uses": [
+        "王冠终式英语播报"
+      ],
+      "evidence": [
+        "KenneyVoiceoverFighter_原始许可.txt",
+        "KenneyVoiceoverFighter_来源.json",
+        "人物配音与TTS_来源状态说明.txt"
+      ],
+      "license": "参考音频CC0 1.0；合成输出与声音相关权利另行核对",
+      "generation_process": "本地Qwen3-TTS生成，参考Kenney Voiceover Fighter音频。"
+    }
+  ],
+  "statement": "本清单记录来源及已收集证据，不是对所有第三方权利均已解决的保证。",
+  "evidence_base_path": "许可与来源/"
+}

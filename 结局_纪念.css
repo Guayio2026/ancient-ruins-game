@@ -1,0 +1,16 @@
+#endingScreen{position:fixed;inset:0;box-sizing:border-box;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;overflow:hidden;background:#071523;color:#e6f8ff}
+#endingScreen::backdrop{background:#071523}
+#endingScreen .endingArt,#endingScreen .endingVideo,#endingScreen .endingSnow{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#endingScreen .endingVideo{opacity:0;transition:opacity .8s}#endingScreen .endingVideo.ready{opacity:1}
+#endingScreen:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#04101ed9, #04101e7a 40%,transparent 65%);pointer-events:none}
+#endingScreen .endingSnow{pointer-events:none;z-index:1}
+.endingCopy{position:relative;z-index:2;box-sizing:border-box;width:min(640px,54vw);height:100%;padding:clamp(65px,16vh,190px) 0 40px 7vw;font-family:var(--frost-ui-font,'Microsoft YaHei',sans-serif)}
+.endingEyebrow{margin:0 0 22px;font-size:11px;letter-spacing:5px;color:#9ccadf}
+#endingScreen h1{margin:0 0 28px;font-family:var(--frost-title-font,'KaiTi',serif);font-size:clamp(32px,4vw,64px);font-weight:500;letter-spacing:5px;color:#ecfcff;text-shadow:0 0 20px #6bd9ff88,0 2px 2px #092542}
+.endingLines{font-family:var(--frost-title-font,'KaiTi',serif);font-size:clamp(19px,1.7vw,27px);line-height:1.85;letter-spacing:2px;color:#e3f4fb}
+.endingAfterword{font-size:13px;line-height:2;letter-spacing:1px;color:#afcbd9}
+.endingAchievements{display:flex;gap:25px;margin:20px 0 25px}.endingAchievements figure{margin:0;text-align:center}.endingAchievements img{width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 0 7px #66d9ff66)}.endingAchievements .locked img{filter:grayscale(1);opacity:.35}.endingAchievements figcaption{font-size:11px;color:#b5d6e5}
+.endingActions{display:flex;gap:12px;flex-wrap:wrap}.endingActions button{border:1px solid #94d7ee88;border-radius:3px 12px 3px 12px;padding:12px 24px;background:#0c2b41dc;color:#def6ff;font-family:var(--frost-title-font,'KaiTi',serif);font-size:17px;cursor:pointer}.endingActions button:hover,.endingActions button:focus-visible{outline:1px solid #baf2ff;background:#215978}.endingActions button:disabled{opacity:.5;cursor:wait}.endingStatus{font-size:12px;color:#a3d2e6;min-height:20px}
+@media(max-width:650px){#endingScreen .endingArt,#endingScreen .endingVideo{object-position:72% center}.endingCopy{width:100%;padding:45vh 24px 20px;background:linear-gradient(0deg,#04101ef5,#04101ea3 50%,transparent 75%);overflow-y:auto}.endingEyebrow{margin-bottom:12px;font-size:9px}#endingScreen h1{margin-bottom:10px;font-size:31px}.endingLines{font-size:18px;margin:8px 0}.endingAfterword{font-size:11px}.endingAchievements{margin:10px 0;gap:18px}.endingAchievements img{width:42px;height:42px}.endingActions button{font-size:15px;padding:10px 18px}}
+@media(max-height:650px) and (min-width:651px){.endingCopy{padding-top:7vh}#endingScreen h1{margin-bottom:12px;font-size:38px}.endingEyebrow{margin-bottom:12px}.endingLines{font-size:20px;line-height:1.5}.endingAchievements{margin:12px 0}.endingAchievements img{width:44px;height:44px}.endingAfterword{font-size:11px}}
+@media(prefers-reduced-motion:reduce){#endingScreen .endingVideo{display:none}#endingScreen .endingVideo{transition:none}}

@@ -1,0 +1,10 @@
+{
+  "author": "Écrivain",
+  "license": "CC0",
+  "original": "https://opengameart.org/content/icy-heights",
+  "repository": "https://github.com/ValyriaTear/ValyriaTear/blob/1c882efff325c941c59aa59c93fb1256258ac845/data/music/icy_wind.ogg",
+  "licenseSource": "https://github.com/ValyriaTear/ValyriaTear/blob/1c882efff325c941c59aa59c93fb1256258ac845/LICENSES.txt",
+  "source_sha256": "d71df74ac19ab6b7b17d79c7ee103da86c7b8a7ba4ec245f5558694d3b3443d5",
+  "modifications": "Crop/repeat to 22.2s, HP100Hz LP4800Hz, gentle fade; runtime gain .24 and voice/impact ducking.",
+  "license_record_excerpt": "data/music/icy_wind.ogg  CC0  Ecrivain (OGA) - https://opengameart.org/content/icy-heights"
+}

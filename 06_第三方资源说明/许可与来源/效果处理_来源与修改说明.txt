@@ -1,0 +1,15 @@
+以下为最终王冠演出中实际采用的效果处理参考，未将对应运行库整体引入游戏。
+
+PixiJS Filters（MIT）
+来源：https://github.com/pixijs/filters
+用途：径向冲击波、辉光和叠加效果的实现参考，已转为本项目Canvas/离线像素合成。
+
+FidelityFX CAS（MIT）
+来源：https://github.com/GPUOpen-Effects/FidelityFX-CAS
+用途：局部关键帧锐化处理，最终处理后的关键帧随演出引用。
+
+Slash Shader（MIT）
+来源：https://github.com/priyanshsingh102005/Fiery-Slash-Shader-for-Godot-Dynamic-Sword-Trail-VFX-3D-
+用途：流动噪声、亮暗渐变与消散思路，改为二维冰蓝斩光合成；不引入Godot运行环境。
+
+三项原始许可证分别随附。其它仅浏览、未复制代码及未用于最终成果的试验项目不列作本次随包依赖。

@@ -1,0 +1,18 @@
+{
+  "author": "Kenney",
+  "license": "CC0 1.0 Universal",
+  "repository": "https://github.com/Calinou/kenney-interface-sounds",
+  "revision": "4596a49eaf5a533948d49a47467f606bcdea70ff",
+  "files": [
+    {
+      "purpose": "hover",
+      "file": "select_003.wav",
+      "sha256": "62004129482c8521549ae3c7c8579f81c3618937bfa25dde125fcf0daa6f066a"
+    },
+    {
+      "purpose": "confirm",
+      "file": "glass_001.wav",
+      "sha256": "39182b395a30b34e18cbcf842922552b23da5b010a52b7777557e02a405f083e"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 68" fill="none" preserveAspectRatio="none">
+ <defs><linearGradient id="ice" x1="0" y1="0" x2="0" y2="68" gradientUnits="userSpaceOnUse"><stop stop-color="#dbf7ff"/><stop offset=".46" stop-color="#75a9ba"/><stop offset="1" stop-color="#bce6ef"/></linearGradient><g id="motif" stroke="url(#ice)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M20 17L29 32L20 47L11 32ZM20 17V47M11 32H29M15 25L25 39M25 25L15 39"/><path d="M8 21L10 18L12 21L10 24ZM30 42L32 39L34 42L32 45Z" fill="url(#ice)"/></g></defs>
+ <path d="M29 3H147L153 6H187L193 3H311L318 10H328L334 21V26L338 34L334 42V47L328 58H318L311 65H193L187 62H153L147 65H29L22 58H12L6 47V42L2 34L6 26V21L12 10H22Z" stroke="url(#ice)" stroke-width="1.2"/>
+ <path d="M35 8H144L151 11H189L196 8H305L313 15H324L329 24V44L324 53H313L305 60H196L189 57H151L144 60H35L27 53H16L11 44V24L16 15H27Z" stroke="url(#ice)" stroke-width=".6" opacity=".58"/>
+ <use href="#motif" transform="translate(1 2)"/><use href="#motif" transform="translate(339 2) scale(-1 1)"/>
+ <g stroke="url(#ice)" stroke-width=".8"><path d="M47 10H115M225 10H293M47 58H115M225 58H293" opacity=".55"/><path d="M151 6L159 3H165M175 3H181L189 6M151 62L159 65H165M175 65H181L189 62"/></g>
+ <path d="M170 1L174 5L170 9L166 5ZM170 59L174 63L170 67L166 63Z" fill="url(#ice)"/>
+ <g fill="#b7e0eb" opacity=".8"><circle cx="42" cy="10" r="1"/><circle cx="298" cy="10" r="1"/><circle cx="42" cy="58" r="1"/><circle cx="298" cy="58" r="1"/></g>
+ </svg>

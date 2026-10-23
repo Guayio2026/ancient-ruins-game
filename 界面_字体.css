@@ -1,0 +1,7 @@
+:root{--frost-ui-font:'Noto Sans SC','Microsoft YaHei','PingFang SC',sans-serif;--frost-story-font:'Noto Serif SC','Source Han Serif SC','STSong','SimSun',serif;--frost-title-font:'STKaiti','KaiTi','Noto Serif SC',serif}
+#loreDialog .loreText{font-family:var(--frost-story-font);font-size:17px;line-height:2.05;letter-spacing:1px;color:#d6e5eb;text-shadow:0 1px 3px #0003}
+#loreTitle,#controlsTitle,#titleSoundDialog h2{font-family:var(--frost-title-font);font-weight:normal;letter-spacing:4px}
+#controlsDialog,#titleSoundDialog{font-family:var(--frost-ui-font);font-size:13px;line-height:1.9}
+#controlsDialog .controlsGrid b{font-weight:400;color:#d4e5ed}
+#loreDialog .loreFoot,#loreDialog .loreClose{font-family:var(--frost-ui-font)}
+@media(max-width:600px),(max-height:600px){#loreDialog .loreText{font-size:15px;line-height:1.95;letter-spacing:.6px}}

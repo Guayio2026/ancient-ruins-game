@@ -1,0 +1,12 @@
+{
+  "name": "Oculus Audio Pack 01",
+  "author": "Oculus VR, LLC",
+  "source": "https://developers.meta.com/vr/downloads/package/oculus-audio-pack-1/",
+  "mirror": "https://github.com/facebookincubator/Meta-open-sound/tree/251c0be57d5d1b3242b91f53e0cde62ab1cb42d9/corpora/oculus-audio-pack",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "uses": "王冠终式剑斩、剑刃碰撞、峰值玻璃破裂等音效层",
+  "modifications": "原文件已按UCS命名；OGG由WAV转码；本项目另作裁切、变速、EQ、立体声与分层混音。",
+  "runtime": "王冠终式manifest音效轨及现有实录原声音轨",
+  "license_evidence": "OculusAudioPack_CC_BY_4_0_LICENSE_original.txt"
+}

@@ -1,0 +1,26 @@
+/* 游戏顶部：统一场景内边距与高度，章节栏和工具入口分组。 */
+body.playing #levelBtns{transition:opacity .45s ease,filter .45s ease,translate .45s ease,visibility 0s;}
+body.playing.combat-active #levelBtns{opacity:0;filter:blur(7px);translate:0 -14px;pointer-events:none;visibility:hidden;transition:opacity .45s ease,filter .45s ease,translate .45s ease,visibility 0s .45s;}
+@media(prefers-reduced-motion:reduce){body.playing #levelBtns,body.playing.combat-active #levelBtns{transition:none;filter:none;translate:none;}}
+body.playing #levelBtns{top:calc(var(--scene-top,0px) + 14px);width:clamp(420px,40vw,520px);gap:3px;padding:4px;border:1px solid #92c7de55;border-radius:9px;background:linear-gradient(150deg,#102c3de8,#071724e8);box-shadow:inset 0 1px 0 #d9f7ff18,0 5px 16px #020a1844;backdrop-filter:blur(10px)}
+body.playing #levelBtns button{flex:1 1 0;width:auto;min-width:0;min-height:32px;padding:5px 6px;border:1px solid transparent;border-radius:5px;font:11px/20px 'Microsoft YaHei',sans-serif;letter-spacing:.4px;background:transparent;box-shadow:none;color:#a0bdcf;text-shadow:0 1px 2px #020b19}
+body.playing #levelBtns button:before{opacity:.18}body.playing #levelBtns button:after{opacity:.2}
+body.playing #levelBtns button:hover{background:#35678144;border-color:#9cdeee44;color:#e2f6ff}
+body.playing #levelBtns button.on{background:linear-gradient(140deg,#2c607b,#153b55);border-color:#aadbe499;color:#e7fbff;box-shadow:inset 0 1px 0 #e8fbff26,0 1px 6px #0003}
+body.playing #levelBtns button.on:after{opacity:.45}
+body.playing #levelBtns button:focus-visible,body.playing #helpButton:focus-visible,body.playing #audioPanel summary:focus-visible{outline:1px solid #d4f4ff;outline-offset:3px}
+body.playing #helpButton,body.playing #audioPanel{top:calc(var(--scene-top,0px) + 14px);border:1px solid #8cbdce66;border-radius:7px;background:linear-gradient(145deg,#15384ae8,#0a2033e8);box-shadow:inset 0 1px 0 #d7f6ff18,0 4px 14px #020a1833;font-family:'Microsoft YaHei',sans-serif;backdrop-filter:blur(10px)}
+body.playing #helpButton{right:calc(var(--scene-side,0px) + 192px);height:42px;min-height:42px;padding:0 13px;line-height:40px;font-size:11px;letter-spacing:.5px;color:#c6e3ef}
+body.playing #helpButton:before{opacity:.25}body.playing #helpButton:after{opacity:.22}
+body.playing #audioPanel{right:calc(var(--scene-side,0px) + 18px);width:164px;max-width:calc(100vw - 28px);padding:10px 12px;overflow:clip}
+body.playing #audioPanel:not([open]){height:42px;padding:0 12px}
+body.playing #audioPanel summary,body.playing #audioPanel:not([open]) summary{height:40px;line-height:40px;font-size:11px;color:#c6e3ef;white-space:nowrap;letter-spacing:.1px;list-style:none;cursor:pointer}
+body.playing #audioPanel summary::-webkit-details-marker{display:none}
+body.playing #audioPanel summary:before{content:'♫';margin-right:7px;color:#96cde2}
+body.playing #audioPanel summary:after{content:'⌄';margin-left:7px;font-size:12px;color:#8fb6c9;text-shadow:none}
+body.playing #audioPanel[open]{width:218px;background:linear-gradient(150deg,#132e42f5,#081b2cf5)}
+body.playing #audioPanel[open] summary{height:31px;line-height:20px;margin-bottom:12px;padding-bottom:10px}
+body.playing #audioPanel[open] summary:after{content:'⌃'}
+body.playing #audioPanel:before{opacity:.18}body.playing #audioPanel:after{opacity:.2}
+@media(max-width:1150px){body.playing #levelBtns{width:420px}body.playing #helpButton,body.playing #audioPanel{top:calc(var(--scene-top,0px) + 66px)}}
+@media(max-width:760px){body.playing #levelBtns{top:calc(var(--scene-top,0px) + 10px);width:calc(100vw - var(--scene-side,0px)*2 - 24px);max-width:520px;padding:3px;gap:1px}body.playing #levelBtns button{font-size:10px;letter-spacing:0;padding:4px 2px;min-height:29px;line-height:19px}body.playing #helpButton,body.playing #audioPanel{top:calc(var(--scene-top,0px) + 58px)}body.playing #helpButton{right:calc(var(--scene-side,0px) + 160px);height:34px;min-height:34px;line-height:32px;font-size:10px;padding:0 9px}body.playing #audioPanel{right:calc(var(--scene-side,0px) + 12px);width:140px}body.playing #audioPanel:not([open]){height:34px;padding:0 8px}body.playing #audioPanel:not([open]) summary{height:32px;line-height:32px;font-size:10px}body.playing #audioPanel summary:before{margin-right:5px}}

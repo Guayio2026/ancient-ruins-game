@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-23",
+  "version": "3.15.0",
+  "registry_url": "https://registry.npmjs.org/gsap/3.15.0",
+  "official_repository": "https://github.com/greensock/GSAP/tree/3.15.0",
+  "official_license_url": "https://gsap.com/standard-license",
+  "package_license_declaration": "Standard 'no charge' license: https://gsap.com/standard-license.",
+  "tarball_url": "https://registry.npmjs.org/gsap/-/gsap-3.15.0.tgz",
+  "tarball_sha1": "7851baaffc77642f2db3b1749d3634f9b5a19d14",
+  "tarball_integrity_sha512": "sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==",
+  "package_contains_LICENSE_file": false,
+  "archived_license_full_text": false,
+  "archived_materials": "官方npm包package.json、README中的许可声明与链接；随库原版权声明。未将README当作条款全文。",
+  "dist_gsap_min_js_sha256": "92bb9a96476f983d212a2bc4f54c889039c1696dd4461d40a736860938570fbb",
+  "packaged_runtime_matches_npm_dist": true,
+  "excluded_file": {
+    "filename": "GSAP_官方许可页_原文.html",
+    "reason": "下载所得为反爬验证页面，不含许可条款，已移出正式提交目录。",
+    "sha256": "9476f8c79d20a3020b03d4f63d0291aef3b5e3fea81bdebd32f90d6806ff41d6"
+  },
+  "files": [
+    {
+      "file": "GSAP_3.15.0_package_官方原文.json",
+      "archive_member": "package/package.json",
+      "source_url": "https://registry.npmjs.org/gsap/-/gsap-3.15.0.tgz",
+      "sha256": "85cc13e31f7a3cd124b587a40f545f265f47d0dfb9a556bb122d70fc0fca3459"
+    },
+    {
+      "file": "GSAP_3.15.0_README_官方原文.txt",
+      "archive_member": "package/README.md",
+      "source_url": "https://registry.npmjs.org/gsap/-/gsap-3.15.0.tgz",
+      "sha256": "66a79667b0538b19634b5a000a9a3debe588c98d390424e73e5d4de847270828"
+    }
+  ]
+}

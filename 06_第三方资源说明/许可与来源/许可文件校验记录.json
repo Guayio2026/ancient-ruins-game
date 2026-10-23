@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-23",
+  "files": [
+    {
+      "file": "ARPHICPL_English_original.txt",
+      "source_url": "https://raw.githubusercontent.com/chanind/hanzi-writer-data/master/ARPHICPL.TXT",
+      "resolved_url": "https://raw.githubusercontent.com/chanind/hanzi-writer-data/master/ARPHICPL.TXT",
+      "sha256": "5590533436c70f10f2f524ee61456238c290175c6662fbe1c700b5f038a6d328",
+      "retrieved_date": "2026-10-23",
+      "operation": "verbatim_download"
+    },
+    {
+      "file": "ARPHICPL_中文原文.txt",
+      "source_url": "https://raw.githubusercontent.com/chanind/hanzi-writer-data/master/APL/zh_CN.UTF-8/ARPHICPL.TXT",
+      "resolved_url": "https://raw.githubusercontent.com/chanind/hanzi-writer-data/master/APL/zh_CN.UTF-8/ARPHICPL.TXT",
+      "sha256": "1038e6570c1454456cae551164d0a8e41c638fb4841ff9f37d257307e5febbd4",
+      "retrieved_date": "2026-10-23",
+      "operation": "verbatim_download"
+    },
+    {
+      "file": "HanziWriterData_README_原文.txt",
+      "source_url": "https://raw.githubusercontent.com/chanind/hanzi-writer-data/master/README.md",
+      "resolved_url": "https://raw.githubusercontent.com/chanind/hanzi-writer-data/master/README.md",
+      "sha256": "e682a6485ca67834f6c5e360c56c4918d91b2f74aafaba5903f047eb1c0753f5",
+      "retrieved_date": "2026-10-23",
+      "operation": "verbatim_download"
+    },
+    {
+      "file": "PixiJS_Filters_MIT_LICENSE_original.txt",
+      "source_record": "artwork/王冠终式_游戏_v3/来源/PixiJS_Filters_MIT_LICENSE.txt",
+      "sha256": "a2c2ecfc4c7ded58efbd9a50ef4070a233c9c6195b08f910564c698da53ba2fd",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "FidelityFX_CAS_MIT_LICENSE_original.txt",
+      "source_record": "artwork/王冠终式_游戏_v3/来源/FidelityFX_CAS_LICENSE.txt",
+      "sha256": "e008031a95f6f655def9eaf914118531c9e1055b8ea201eb98b9f95f1af9bec4",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "SlashShader_MIT_LICENSE_original.txt",
+      "source_record": "artwork/王冠终式_游戏_v3/来源/SlashShader_MIT_LICENSE.txt",
+      "sha256": "1c255038ebb9945b6b36c568ea55793cd4f272cb6c53beb2e648eea2946f3850",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "KenneyImpact_CC0_original.txt",
+      "source_record": "王冠终结大招_素材总库/06_音效候选/LICENSE_Kenney_Impact.txt",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "WyzowlSFXKit_CC0_original.txt",
+      "source_record": "王冠终结大招_素材总库/06_音效候选/LICENSE_SFX_Kit.txt",
+      "sha256": "7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "KenneyInterface_原始许可.txt",
+      "source_record": "音频/菜单选择_Kenney/LICENSE.txt",
+      "sha256": "f7966c773bbed0eca6a9c75081c44a178b38eae112724dbb5fdfbd4192d118a9",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "KenneyInterface_来源.json",
+      "source_record": "音频/菜单选择_Kenney/来源.json",
+      "sha256": "e6a6afd8d2326dca86da4eb5370c80439737e06a6e28e41f4c56a34134cb81c2",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "Unexplored_TAD_来源.json",
+      "source_record": "音乐/Unexplored - TAD/来源与授权.json",
+      "sha256": "dff4cd8f8301825e36932bcd1d011de57894d0f4debcf28901ed1340e8b8e3fc",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "HeartfeltBattle_request_来源.txt",
+      "source_record": "音乐/Heartfelt Battle - request/来源与授权.txt",
+      "sha256": "379eec316b7750a521810ae2d483b14919e20dd003e1193f22fcfc1371a3a455",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "EpicBossBattle_SubspaceAudio_来源.json",
+      "source_record": "提交准备_2026-10-23/正式参赛包_351328/06_第三方资源说明/许可与来源/Epic Boss Battle - Juhani Junkala_source.json",
+      "sha256": "f60456cd123107069a7e76cd06cb1d1a1b65b8a1beaa36504e0539307bbbbebb",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "OculusAudioPack_CC_BY_4_0_LICENSE_original.txt",
+      "source_record": "王冠终结大招_素材总库/06_音效候选/疾速剑斩_Meta_v12/LICENSE",
+      "sha256": "9e5f1b3c610b9c2da5c313bf81d577a7d1acec686bdb0384edefa6df0f90cd94",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "OculusAudioPack_音效署名.txt",
+      "source_record": "提交准备_2026-10-23/正式参赛包_351328/06_第三方资源说明/许可与来源/来源_Oculus_音效署名.txt",
+      "sha256": "852bf8e61a71527887642af59e0930764e8121dff7d3eacf3d9e03133acc533a",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "OculusAudioPack_剑斩署名.txt",
+      "source_record": "提交准备_2026-10-23/正式参赛包_351328/06_第三方资源说明/许可与来源/来源_Oculus_剑斩音效署名.txt",
+      "sha256": "8b3f2a2ec06b3e09f38ee1c4d5e5172a83842505f81b4cad82a363186b406379",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "KenneyRPG_CC0_original.txt",
+      "source_record": "王冠终结大招_素材总库/06_音效候选/清脆剑鸣与峰值冰裂_v2/RPG_LICENSE",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "KenneyVoiceoverFighter_原始许可.txt",
+      "source_record": "音频/Finish与Win_英文播报v1/来源_Kenney_格斗原包/License.txt",
+      "sha256": "1680179f31ab785164f171488dbf262f988483417fb72af353c75aac03e34796",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "KenneyVoiceoverFighter_来源.json",
+      "source_record": "音频/Finish与Win_英文播报v1/来源_Kenney_格斗原包/来源.json",
+      "sha256": "32e461afb8d04c985d76167a9e38071cbf87fec8d276b9527c7ae88493a77aae",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "OculusAudioPack_ATTRIBUTION_original.md",
+      "source_record": "王冠终结大招_素材总库/06_音效候选/疾速剑斩_Meta_v12/ATTRIBUTION.md",
+      "sha256": "e57c6442cee8d9f249f2ec85c5ad26f7152d853045d2c5b6977b328b6a0b529d",
+      "operation": "unchanged_copy"
+    },
+    {
+      "file": "GSAP_3.15.0_package_官方原文.json",
+      "source_url": "https://registry.npmjs.org/gsap/-/gsap-3.15.0.tgz",
+      "source_member": "package/package.json",
+      "version": "3.15.0",
+      "sha256": "85cc13e31f7a3cd124b587a40f545f265f47d0dfb9a556bb122d70fc0fca3459",
+      "retrieved_date": "2026-10-23",
+      "operation": "unchanged_extract_from_integrity_verified_official_npm_package"
+    },
+    {
+      "file": "GSAP_3.15.0_README_官方原文.txt",
+      "source_url": "https://registry.npmjs.org/gsap/-/gsap-3.15.0.tgz",
+      "source_member": "package/README.md",
+      "version": "3.15.0",
+      "sha256": "66a79667b0538b19634b5a000a9a3debe588c98d390424e73e5d4de847270828",
+      "retrieved_date": "2026-10-23",
+      "operation": "unchanged_extract_from_integrity_verified_official_npm_package"
+    }
+  ],
+  "notes": "GSAP旧反爬页已排除；官方发布包仅归档许可声明与链接，未归档许可条款全文。其它许可来源不变。"
+}

@@ -1,0 +1,103 @@
+/* 局内 HUD：保留雪花盘的坐标与原生 Canvas，不影响标题和开发跳关入口。 */
+/* 战斗状态由真实敌人/Boss判定驱动，立即移除卡片，避免淡出残影。 */
+body.playing:is(.combat-active,.boss-fight,.crown-ult-playing) #levelBtns {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+body.playing {
+  --hud-edge: 22px;
+  --hud-glass: linear-gradient(135deg, #153348ed, #081b2bea);
+}
+body.playing #portraitHUD {
+  transform: translate(4px, -12px) scale(.80);
+  transform-origin: top left;
+}
+body.playing #levelBtns {
+  top: calc(var(--scene-top, 0px) + 20px);
+  width: clamp(390px, 35vw, 500px);
+  padding: 5px;
+  gap: 3px;
+  border-color: #a8dded38;
+  border-radius: 12px;
+  background: var(--hud-glass);
+  box-shadow: inset 0 1px 0 #e7fbff15, 0 8px 24px #020b1926;
+}
+body.playing #levelBtns button {
+  min-height: 34px;
+  border-radius: 7px;
+  color: #a4bfcc;
+  font-size: 11px;
+  letter-spacing: .5px;
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+body.playing #levelBtns button.on {
+  color: #edfcff;
+  border-color: #a0def078;
+  background: linear-gradient(135deg, #376782bc, #1a405bc9);
+  box-shadow: inset 0 1px 0 #e4fbff26, 0 2px 8px #00132244;
+}
+body.playing #helpButton, body.playing #audioPanel, body.playing #saveExitButton {
+  background: var(--hud-glass);
+  border-color: #a8dded38;
+  border-radius: 9px;
+  box-shadow: inset 0 1px 0 #e7fbff15, 0 6px 20px #020b1926;
+}
+body.playing #helpButton, body.playing #audioPanel {
+  top: calc(var(--scene-top, 0px) + 20px);
+}
+body.playing #audioPanel, body.playing #saveExitButton {
+  right: calc(var(--scene-side, 0px) + var(--hud-edge));
+}
+body.playing #helpButton { right: calc(var(--scene-side, 0px) + 198px); }
+body.playing #saveExitButton {
+  top: calc(var(--scene-top, 0px) + 72px);
+  height: 34px;
+  min-height: 34px;
+  line-height: 32px;
+  color: #aec9d7;
+  background: #0a2132c9;
+}
+body.playing #helpButton:hover, body.playing #saveExitButton:hover,
+body.playing #audioPanel summary:hover { color: #edfcff; border-color: #b9e8f18c; }
+body.playing #supportDiamond {
+  left: calc(var(--scene-side, 0px) + 20px);
+  bottom: calc(var(--scene-top, 0px) + 48px);
+  transform: scale(.82);
+}
+body.playing #skillBar {
+  right: calc(var(--scene-side, 0px) + 20px);
+  bottom: calc(var(--scene-top, 0px) + 32px);
+  transform: scale(.86);
+}
+body.playing #supportDiamond .skillName, body.playing #skillBar .skillName {
+  color: #d3eaf4;
+  letter-spacing: .5px;
+  text-shadow: 0 1px 4px #000, 0 0 8px #031424;
+}
+body.playing .skillKey { box-shadow: 0 2px 5px #0005; }
+body.playing #saveMemoryToast { top: calc(var(--scene-top, 0px) + 118px); }
+@media (max-width: 1150px) {
+  body.playing #levelBtns { width: 390px; }
+  body.playing #helpButton, body.playing #audioPanel { top: calc(var(--scene-top, 0px) + 76px); }
+  body.playing #saveExitButton { top: calc(var(--scene-top, 0px) + 128px); }
+  body.playing #saveMemoryToast { top: calc(var(--scene-top, 0px) + 174px); }
+}
+@media (max-height: 650px), (max-width: 760px) {
+  body.playing #supportDiamond { transform: scale(.66); bottom: calc(var(--scene-top, 0px) + 44px); left: calc(var(--scene-side, 0px) + 8px); }
+  body.playing #skillBar { transform: scale(.70); bottom: calc(var(--scene-top, 0px) + 24px); right: calc(var(--scene-side, 0px) + 8px); }
+}
+@media (max-width: 760px) {
+  body.playing { --hud-edge: 12px; }
+  body.playing #levelBtns { top: calc(var(--scene-top, 0px) + 10px); width: calc(100vw - var(--scene-side, 0px)*2 - 24px); padding: 3px; }
+  body.playing #levelBtns button { min-height: 29px; font-size: 10px; letter-spacing: 0; }
+  body.playing #helpButton, body.playing #audioPanel { top: calc(var(--scene-top, 0px) + 58px); }
+  body.playing #helpButton { right: calc(var(--scene-side, 0px) + 160px); }
+  body.playing #saveExitButton { top: calc(var(--scene-top, 0px) + 100px); }
+  body.playing #saveMemoryToast { top: calc(var(--scene-top, 0px) + 144px); }
+  body.playing #portraitHUD { transform: translate(-4px, -8px) scale(.72); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.playing #levelBtns button { transition: none; }
+}

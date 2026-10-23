@@ -1,0 +1,29 @@
+Kenney Impact Sounds
+来源：https://kenney.nl/assets/impact-sounds
+许可：CC0 1.0
+用途：Boss重击、脚步与破甲，以及王冠演出中的撞击及冰晶质感层。
+
+Wyzowl SFX Kit
+来源：https://github.com/wyzowl/sfx-kit
+许可：CC0 1.0
+用途：Boss风压及王冠演出的whoosh、riser、shimmer、impact与提示音等。
+
+Kenney RPG Audio
+来源：https://github.com/Boyquotes/kenney-rpg-audio-for-godot
+许可：CC0 1.0
+用途：王冠演出中的拔刃、刀剑划动及金属点击等混音层。
+
+Deep Monster Roar
+作者：trazzz123
+来源：https://opengameart.org/content/cc0-deep-monster-roar
+许可：来源页标注CC0 1.0
+用途：Boss怪物怒吼处理层。
+
+Kenney Interface Sounds
+来源：https://github.com/Calinou/kenney-interface-sounds
+作者：Kenney
+许可：CC0
+用途：菜单悬停与选择确认，素材select_003.wav和glass_001.wav。
+
+风声：Icy Heights，作者Écrivain，CC0；详见IcyHeights_风声来源.json。
+处理包括裁切、变调、淡入淡出、均衡、混音、峰值控制与游戏触发。Oculus音效另适用CC BY 4.0，人物语音及其音色参考也另行说明；本文件不表示所有游戏音频均为CC0。

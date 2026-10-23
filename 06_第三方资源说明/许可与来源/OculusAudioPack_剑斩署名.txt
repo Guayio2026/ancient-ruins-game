@@ -1,0 +1,2 @@
+"Oculus Audio Pack 01" by Oculus VR, LLC (https://developers.meta.com/vr/downloads/package/oculus-audio-pack-1/), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Files renamed to the UCS naming convention; OGG previews transcoded from the original WAVs.
+本项目修改：挥剑与剑刃碰撞音经裁切、变速、EQ、立体声与分层混音，用于巨剑划斩与剑鸣。
